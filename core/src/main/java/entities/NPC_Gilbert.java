@@ -1,6 +1,7 @@
 package entities;
 
 import com.badlogic.gdx.graphics.Texture;
+import jokerhut.main.DialogueHandler;
 import jokerhut.main.MainScreen;
 
 public class NPC_Gilbert extends NPC {
@@ -22,7 +23,27 @@ public class NPC_Gilbert extends NPC {
             hitboxWidth,
             hitboxHeight
         );
+        this.dialogueHandler = new DialogueHandler(this, screen, setupLines());
     }
+
+    public String[] setupLines () {
+
+        String[] npcLines = new String[4];
+        int i = 0;
+        npcLines[i] = "Hello there!";
+        i++;
+        npcLines[i] = "I'm Gilbert the merchant";
+        i++;
+        npcLines[i] = "Would you like to buy anything?";
+        i++;
+        npcLines[i] = "Here is what i have to offer!";
+        i++;
+
+        return npcLines;
+
+    }
+
+
 
 
 }

@@ -2,6 +2,7 @@ package hud;
 
 import Constants.Constants;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -48,7 +49,7 @@ public class HUD {
         stage.getViewport().update(width, height, true);
     }
 
-    public void drawDialogue(SpriteBatch batch) {
+    public void drawDialogue(String line, SpriteBatch batch) {
         float screenWidth = Gdx.graphics.getWidth();
 
         float slotSize = 64f;
@@ -59,17 +60,26 @@ public class HUD {
         float boxX = inventoryWidth + 30;
         float boxY = 10;
 
-        // 1. Draw the dialogue box first (behind the portrait)
         batch.draw(dialogueBoxTexture, boxX, boxY, boxWidth, boxHeight);
 
-        // 2. Draw the portrait on top, slightly more to the right
         float portraitSize = 72f;
-        float portraitX = boxX + Constants.TILESIZE; // shift into the dialogue box slightly
+        float portraitX = boxX + Constants.TILESIZE;
         float portraitY = boxY + boxHeight - portraitSize - Constants.TILESIZE;
 
-        if (screen.currentNPC != null && screen.currentNPC.portrait != null) {
+        if (screen.currentNPC != null && screen.currentNPC.portrait != null && screen.currentNPC.dialogueHandler != null) {
             batch.draw(screen.currentNPC.portrait, portraitX, portraitY, portraitSize, portraitSize);
         }
+        font.setColor(Color.BLACK);
+        font.getData().setScale(1.2f);
+        float textX = portraitX + portraitSize + 35;
+        float textY = boxY + boxHeight - 40;
+        font.draw(batch, screen.currentNPC.name, textX, textY);
+
+        float lineTextX = textX;
+        float lineTextY = textY - 20;
+
+        font.draw(batch, line, lineTextX, lineTextY);
+
     }
 
 //    public void refreshInventory () {

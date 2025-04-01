@@ -1,6 +1,7 @@
 package entities;
 
 import com.badlogic.gdx.graphics.Texture;
+import jokerhut.main.DialogueHandler;
 import jokerhut.main.MainScreen;
 
 public class NPC_Guard extends NPC {
@@ -20,6 +21,24 @@ public class NPC_Guard extends NPC {
             hitboxWidth,
             hitboxHeight
         );
+        this.dialogueHandler = new DialogueHandler(this, screen, setupLines());
+
+    }
+
+    public String[] setupLines () {
+
+        String[] npcLines = new String[4];
+        int i = 0;
+        npcLines[i] = "You can not pass";
+        i++;
+        npcLines[i] = "Move along.";
+        i++;
+        npcLines[i] = "Stop bothering me...";
+        i++;
+        npcLines[i] = "You are not permitted to enter";
+        i++;
+
+        return npcLines;
 
     }
 

@@ -126,8 +126,9 @@ public class Player extends Entity{
         }
 
         updateDialogueCollisionZone();
-        screen.collisionChecker.checkEntityDialogueCollision(screen.npcArray, this);
         sprite.setPosition(position.x, position.y);
+        screen.collisionChecker.checkEntityDialogueCollision(screen.npcArray, this);
+        playerKeyHandler.enterDialogue();
 
     }
 

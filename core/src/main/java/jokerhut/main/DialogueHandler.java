@@ -8,16 +8,13 @@ public class DialogueHandler {
     MainScreen screen;
     public int currentLine;
 
-    private String[] lines = {
-        "Move along now",
-        "You can not pass",
-        "Stop bothering me."
-    };
+    public String[] lines;
 
-    public DialogueHandler (NPC npc, MainScreen screen) {
+    public DialogueHandler (NPC npc, MainScreen screen, String[] lines) {
         this.npc = npc;
         this.screen = screen;
         this.currentLine = -1;
+        this.lines = lines;
     }
 
     public void startDialogue() {

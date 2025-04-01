@@ -34,7 +34,10 @@ public class MainScreen implements Screen {
     CollisionDebug collisionDebugger;
     MusicHandler musicHandler;
     public Array<Entity> npcArray;
+
     public NPC currentNPC;
+    public boolean isInDialogue = false;
+
     public HUD hud;
     public Player player;
 
@@ -54,7 +57,6 @@ public class MainScreen implements Screen {
         this.collisionChecker = new CollisionChecker();
         this.npcArray = setupNpcs();
         batch = new SpriteBatch();
-        this.currentNPC = (NPC) npcArray.get(3);
 
         player = new Player(5, 15, this);
         musicHandler.playVillageMusic();
@@ -67,8 +69,12 @@ public class MainScreen implements Screen {
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         mainCamera.updateCamera(delta);
-        player.update(delta);
-        updateEntityArrays(delta);
+        if (!isInDialogue) {
+            player.update(delta);
+            updateEntityArrays(delta);
+        } else {
+            player.playerKeyHandler.checkUpdateDialogue();
+        }
         renderer.setView(mainCamera.camera);
         batch.setProjectionMatrix(mainCamera.camera.combined); // sync batch with camera
         renderer.render();
@@ -79,15 +85,20 @@ public class MainScreen implements Screen {
         runScreenDebugMethods();
         hud.render(delta);
         batch.begin();
-        if (this.currentNPC != null) {
-            hud.drawDialogue(batch);
+        if (this.currentNPC != null && this.currentNPC.dialogueHandler != null) {
+            hud.drawDialogue(currentNPC.dialogueHandler.getCurrentLine(), batch);
         }
         batch.end();
     }
+
+
+
     public Array<Entity> setupNpcs () {
         npcArray = new Array<>();
         npcArray.add(new NPC_OldMan(7, 15, this));
         npcArray.add(new NPC_OldMan(9, 13, this));
+        npcArray.add(new NPC_OldMan(10.8f, 2.5f, this));
+        npcArray.add(new NPC_OldMan(17, 3, this));
         npcArray.add(new NPC_Guard(14, 0.5f, this));
         npcArray.add(new NPC_Guard(15, 0.5f, this));
         npcArray.add(new NPC_Gilbert(13.7f, 7f, this));

@@ -2,6 +2,8 @@ package jokerhut.main;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import entities.Entity;
+import entities.NPC;
 import entities.Player;
 import utils.DirectionUtils;
 
@@ -84,5 +86,33 @@ public class KeyHandler {
             System.out.println("X: " + player.position.x + " Y: " + player.position.y);
         }
     }
+
+    public void enterDialogue () {
+        if (Gdx.input.isKeyJustPressed(Input.Keys.E)) {
+            if (!screen.isInDialogue) {
+                for (Entity entity : screen.npcArray) {
+                    if (entity != null && player.dialogueBox.overlaps(entity.collisionRect)) {
+                        screen.isInDialogue = true;
+                        screen.currentNPC = (NPC) entity;
+                        screen.currentNPC.dialogueHandler.startDialogue();
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    public void checkUpdateDialogue () {
+        if (Gdx.input.isKeyJustPressed(Input.Keys.E)) {
+            System.out.println("Advancing");
+            if (!screen.currentNPC.dialogueHandler.advanceLine()) {
+                screen.isInDialogue = false;
+                screen.currentNPC.dialogueHandler.currentLine = -1;
+                screen.currentNPC = null;
+            }
+        }
+    }
+
+
 
 }
