@@ -3,6 +3,7 @@ package jokerhut.main;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
 import entities.Entity;
+import entities.Player;
 
 public class CollisionChecker {
 
@@ -40,6 +41,19 @@ public class CollisionChecker {
         }
 
         return doesCollide;
+    }
+
+    public void checkEntityDialogueCollision (Array<Entity> entities, Player player) {
+        for (Entity entity : entities) {
+            if (entity != null) {
+                if (entity.collisionRect.overlaps(player.dialogueBox)) {
+                    entity.isInteracting = true;
+                    break;
+                } else {
+                    entity.isInteracting = false;
+                }
+            }
+        }
     }
 
 }

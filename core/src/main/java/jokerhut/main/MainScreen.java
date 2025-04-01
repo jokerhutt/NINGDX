@@ -13,8 +13,10 @@ import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import debug.CollisionDebug;
 import entities.*;
+import hud.HUD;
 import sound.MusicHandler;
 
 /** First screen of the application. Displayed after the application is created. */
@@ -32,7 +34,8 @@ public class MainScreen implements Screen {
     CollisionDebug collisionDebugger;
     MusicHandler musicHandler;
     public Array<Entity> npcArray;
-
+    public NPC currentNPC;
+    public HUD hud;
     public Player player;
 
     @Override
@@ -51,9 +54,11 @@ public class MainScreen implements Screen {
         this.collisionChecker = new CollisionChecker();
         this.npcArray = setupNpcs();
         batch = new SpriteBatch();
+        this.currentNPC = (NPC) npcArray.get(3);
 
         player = new Player(5, 15, this);
         musicHandler.playVillageMusic();
+        hud = new HUD(new ScreenViewport(), batch, this);
 
     }
 
@@ -72,6 +77,12 @@ public class MainScreen implements Screen {
         renderEntityArrays(batch);
         batch.end();
         runScreenDebugMethods();
+        hud.render(delta);
+        batch.begin();
+        if (this.currentNPC != null) {
+            hud.drawDialogue(batch);
+        }
+        batch.end();
     }
     public Array<Entity> setupNpcs () {
         npcArray = new Array<>();
@@ -107,6 +118,7 @@ public class MainScreen implements Screen {
     @Override
     public void resize(int width, int height) {
         viewport.update(width, height, true);
+        hud.resize(width, height);
     }
 
     @Override

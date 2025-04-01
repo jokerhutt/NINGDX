@@ -1,6 +1,7 @@
 package entities;
 
 import Constants.Constants;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
@@ -16,6 +17,9 @@ public class Entity {
     public Rectangle collisionRect;
     float hitboxHeight;
     float hitboxWidth;
+    public boolean isInteracting;
+    public boolean isInDialogue;
+    public Texture speechBubble;
 
     public Rectangle getCollisionRect() {
         return this.collisionRect;
@@ -27,6 +31,7 @@ public class Entity {
         this.velocity = new Vector2(0, 0);
         this.position = new Vector2(x, y);
         this.collisionRect = new Rectangle();
+        this.speechBubble = new Texture("emote20.png");
     }
 
     public Vector2 getPosition () {

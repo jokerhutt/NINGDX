@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
+import jokerhut.main.DialogueHandler;
 import jokerhut.main.MainScreen;
 
 public class NPC extends Entity {
@@ -19,6 +20,7 @@ public class NPC extends Entity {
     boolean isMoving;
     public String name;
     public String type;
+    public DialogueHandler dialogueHandler;
     boolean movesOnItsOwn = false;
 
     String idlePath;
@@ -42,6 +44,18 @@ public class NPC extends Entity {
         sprite.setRegion(direction);
     }
 
+    public void drawSpeechBubble (SpriteBatch batch) {
+        if (isInteracting) {
+            float bubbleWidth = 0.5f;
+            float bubbleHeight = 0.5f;
+
+            float bubbleX = sprite.getX() + sprite.getWidth() / 2.2f - bubbleWidth / 2f;
+            float bubbleY = sprite.getY() + (sprite.getHeight() / 1f);
+
+            batch.draw(this.speechBubble, bubbleX, bubbleY, bubbleWidth, bubbleHeight);
+        }
+    }
+
     public void update (float delta) {
         if (this.movesOnItsOwn) {
             setAction(delta);
@@ -49,6 +63,7 @@ public class NPC extends Entity {
     }
 
     public void render (SpriteBatch batch) {
+        drawSpeechBubble(batch);
         sprite.draw(batch);
     }
 
