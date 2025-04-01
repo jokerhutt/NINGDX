@@ -73,7 +73,6 @@ public class MainScreen implements Screen {
         batch.end();
         runScreenDebugMethods();
     }
-
     public Array<Entity> setupNpcs () {
         npcArray = new Array<>();
         npcArray.add(new NPC_OldMan(7, 15, this));
@@ -140,6 +139,9 @@ public class MainScreen implements Screen {
         }
         if (CollisionDebug.SHOWNPCCOLLISION) {
             collisionDebugger.EntityCollisionDebug(npcArray);
+        }
+        if (CollisionDebug.SHOWDIALOGUECOLLISION) {
+            collisionDebugger.playerDialogueBoxDebug();
         }
 
         if (CollisionDebug.DRAWTILEGRID) {

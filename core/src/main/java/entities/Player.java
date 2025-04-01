@@ -21,6 +21,8 @@ public class Player extends Entity{
     public float animationTimer = 0f;
     public boolean moving;
 
+    public Rectangle dialogueBox;
+
     public final Vector2 futurePosition = new Vector2();
 
     public KeyHandler playerKeyHandler;
@@ -35,6 +37,7 @@ public class Player extends Entity{
         sprite.setSize(1f, 1f);
         sprite.setPosition(this.position.x, this.position.y);
         sprite.setRegion(idleDown);
+        this.dialogueBox = new Rectangle();
         this.moving = false;
         this.playerKeyHandler = new KeyHandler(this, screen);
         this.hitboxWidth = 0.8f;
@@ -122,6 +125,8 @@ public class Player extends Entity{
             position.y = futurePosition.y;
         }
 
+        updateDialogueCollisionZone();
+
         sprite.setPosition(position.x, position.y);
 
     }
@@ -162,6 +167,26 @@ public class Player extends Entity{
 
         return false;
 
+    }
+
+    public void updateDialogueCollisionZone () {
+        float offset = 1f;
+        float boxSize = 0.8f;
+
+        float dx = 0;
+        float dy = 0;
+
+        if (lastDirection.x > 0) dx = offset;
+        if (lastDirection.x < 0) dx = -offset;
+        if (lastDirection.y > 0) dy = offset;
+        if (lastDirection.y < 0) dy = -offset;
+
+        dialogueBox.set(
+            getCenterX() + dx - boxSize / 2f,
+            getCenterY() + dy - boxSize / 2f,
+            boxSize,
+            boxSize
+        );
     }
 
     public boolean checkAllCollisions () {

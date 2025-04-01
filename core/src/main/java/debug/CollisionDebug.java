@@ -70,6 +70,21 @@ public class CollisionDebug {
         shapeRenderer.end();
     }
 
+    public void playerDialogueBoxDebug () {
+        shapeRenderer.setProjectionMatrix(screen.mainCamera.camera.combined);
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
+        shapeRenderer.setColor(Color.RED);
+
+        shapeRenderer.rect(
+            screen.player.dialogueBox.x,
+            screen.player.dialogueBox.y,
+            screen.player.dialogueBox.width,
+            screen.player.dialogueBox.height
+        );
+
+        shapeRenderer.end();
+    }
+
     public void drawTileGrid(int mapWidth, int mapHeight, float tileSize) {
         shapeRenderer.setProjectionMatrix(screen.mainCamera.camera.combined);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
