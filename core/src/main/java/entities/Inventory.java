@@ -13,9 +13,8 @@ public class Inventory {
 
         this.inventoryArray = new GameObject[12];
         this.currentSlotIndex = 0;
-        this.currentItem = inventoryArray[currentSlotIndex];
         initialiseInventory();
-
+        this.currentItem = inventoryArray[currentSlotIndex];
     }
 
     public void initialiseInventory () {
@@ -32,6 +31,15 @@ public class Inventory {
         if (currentSlotIndex < 11) {
             currentSlotIndex++;
         }
+    }
+
+    public void updateItem (int i) {
+        currentSlotIndex = i;
+        currentItem = this.inventoryArray[i];
+        if (currentItem != null) {
+            System.out.println(" SELECTED A " + currentItem.name);
+        }
+
     }
 
 }

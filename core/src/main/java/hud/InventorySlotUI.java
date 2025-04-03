@@ -13,27 +13,31 @@ import com.badlogic.gdx.utils.Scaling;
 import objects.GameObject;
 
 public class InventorySlotUI extends Stack {
-    Image bg;
+    private Texture brownSquare;
+    private Texture brownSquareSelected;
+    private Image bg;
     private Image itemImage;
-    Texture backGroundTexture;
+    public boolean isSelected = false;
 
     public InventorySlotUI(GameObject inventoryItem) {
 
-        Texture backGroundTexture = new Texture("brownSquare.png");
+        brownSquare = new Texture("brownSquare.png");
+        brownSquareSelected = new Texture("brownSquareSelected.png");
 
-        bg = new Image(new TextureRegionDrawable(new TextureRegion(backGroundTexture)));
+        bg = new Image(new TextureRegionDrawable(new TextureRegion(brownSquare)));
         this.add(bg);
+
         if (inventoryItem != null) {
             itemImage = new Image(new TextureRegionDrawable(new TextureRegion(inventoryItem.image)));
             itemImage.setScaling(Scaling.stretch);
 
             Container<Image> container = new Container<>(itemImage);
             if (inventoryItem.type == "weapon" && inventoryItem.name == "stick") {
-                container.size(9, 48);  // this is respected!
+                container.size(9, 48);
             } else {
                 container.size(48, 48);
             }
-            container.fill();        // stretch inside
+            container.fill();
             this.add(container);
         }
 
@@ -42,9 +46,8 @@ public class InventorySlotUI extends Stack {
             Label countLabel = new Label(String.valueOf(inventoryItem.count), style);
             countLabel.setFontScale(1.2f);
 
-            // Position in bottom right using a Container
             Container<Label> countContainer = new Container<>(countLabel);
-            countContainer.bottom().right().padBottom(30).padRight(30); // ⬅️ positions it at bottom-right with slight padding
+            countContainer.bottom().right().padBottom(30).padRight(30);
 
             this.add(countContainer);
         }
@@ -61,4 +64,16 @@ public class InventorySlotUI extends Stack {
             this.add(itemImage);
         }
     }
+
+    public void updateBackground() {
+        TextureRegionDrawable bgDrawable;
+        if (isSelected) {
+            bgDrawable = new TextureRegionDrawable(new TextureRegion(brownSquareSelected));
+        } else {
+            bgDrawable = new TextureRegionDrawable(new TextureRegion(brownSquare));
+        }
+        bg.setDrawable(bgDrawable);
+    }
+
+
 }

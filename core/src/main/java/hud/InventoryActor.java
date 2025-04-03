@@ -2,8 +2,10 @@
 
     import com.badlogic.gdx.graphics.Texture;
     import com.badlogic.gdx.graphics.g2d.TextureRegion;
+    import com.badlogic.gdx.scenes.scene2d.InputEvent;
     import com.badlogic.gdx.scenes.scene2d.ui.Image;
     import com.badlogic.gdx.scenes.scene2d.ui.Table;
+    import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
     import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
     import com.badlogic.gdx.utils.Scaling;
     import jokerhut.main.MainScreen;
@@ -16,10 +18,12 @@
         private Texture squareTexture;
         private final Texture choiceBoxTexture;
         public BoxWithText textBox;
+        private int selectedIndex ;
 
         public InventoryActor(MainScreen screen) {
             this.squareTexture = new Texture("brownSquare.png");
             this.choiceBoxTexture = new Texture("choiceBox.png");
+            this.selectedIndex = screen.player.inventory.currentSlotIndex;
             this.screen = screen;
             TextureRegionDrawable drawable = new TextureRegionDrawable(new TextureRegion(squareTexture));
             TextureRegionDrawable choiceDrawable = new TextureRegionDrawable(new TextureRegion(choiceBoxTexture));
@@ -63,7 +67,23 @@
                     item = screen.player.inventory.inventoryArray[i];
                 }
 
+                int index = i;
+
                 InventorySlotUI slot = new InventorySlotUI(item);
+                if (index == selectedIndex) {
+                    slot.isSelected = true;
+                    slot.updateBackground();
+                }
+                slot.addListener(new ClickListener() {
+                    @Override
+                    public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                        screen.player.inventory.updateItem(index);
+                        selectedIndex = index;
+                        refreshInventory();
+                        return true;
+                    }
+                });
+
                 this.add(slot).size(128, 128).pad(4);
 
                 if ((i + 1) % 3 == 0) {
@@ -71,6 +91,7 @@
                 }
             }
         }
+
 
 
 

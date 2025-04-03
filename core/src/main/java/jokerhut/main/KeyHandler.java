@@ -21,28 +21,80 @@ public class KeyHandler {
 
         if (Gdx.input.isKeyPressed(Input.Keys.W)) {
             player.setVelocityY(player.getSpeed());;
-            player.sprite.setRegion(player.walkUp.getKeyFrame(player.animationTimer, true));
+            if (!player.isAttacking) {
+                player.sprite.setRegion(player.walkUp.getKeyFrame(player.animationTimer, true));
+
+            }
             player.setMoving(true);
             player.lastDirection.set(0, 1);
         }
         else if (Gdx.input.isKeyPressed(Input.Keys.A)) {
             player.setVelocityX(player.getSpeed() * -1);;
-            player.sprite.setRegion(player.walkLeft.getKeyFrame(player.animationTimer, true));
+            if (!player.isAttacking) {
+                player.sprite.setRegion(player.walkLeft.getKeyFrame(player.animationTimer, true));
+
+            }
             player.setMoving(true);
             player.lastDirection.set(-1, 0);
         }
         else if (Gdx.input.isKeyPressed(Input.Keys.S)) {
             player.setVelocityY(player.getSpeed() * -1);
-            player.sprite.setRegion(player.walkDown.getKeyFrame(player.animationTimer, true));
+            if (!player.isAttacking) {
+                player.sprite.setRegion(player.walkDown.getKeyFrame(player.animationTimer, true));
+
+            }
             player.setMoving(true);
             player.lastDirection.set(0, -1);
         }
         else if (Gdx.input.isKeyPressed(Input.Keys.D)) {
             player.setVelocityX(player.getSpeed());;
-            player.sprite.setRegion(player.walkRight.getKeyFrame(player.animationTimer, true));
+            if (!player.isAttacking) {
+                player.sprite.setRegion(player.walkRight.getKeyFrame(player.animationTimer, true));
+
+            }
             player.setMoving(true);
             player.lastDirection.set(1, 0);
         }
+
+    }
+
+    public void handleAttacking ( float delta) {
+
+        if (Gdx.input.isKeyPressed(Input.Keys.SPACE)) {
+            if (!player.isAttacking && !player.isInAttackCoolDown
+                && player.inventory.currentItem != null
+                && player.inventory.currentItem.type.equals("weapon")) {
+                player.isAttacking = true;
+               if (player.lastDirection.x == 0 && player.lastDirection.y == 1) {
+                   player.sprite.setRegion(player.attackUp);
+               } else if (player.lastDirection.x == 0 && player.lastDirection.y == -1) {
+                   player.sprite.setRegion(player.attackDown);
+               } else if (player.lastDirection.x == 1 && player.lastDirection.y == 0) {
+                   player.sprite.setRegion(player.attackRight);
+               } else if (player.lastDirection.x == -1 && player.lastDirection.y == 0) {
+                   player.sprite.setRegion(player.attackLeft);
+               }
+            }
+        }
+
+        System.out.println(player.isAttacking);
+        if (player.isAttacking) {
+            player.attackingTimer++;
+            if (player.attackingTimer >= 10) {
+                player.isAttacking = false;
+                player.attackingTimer = 0;
+                player.isInAttackCoolDown = true;
+            }
+        }
+
+        if (player.isInAttackCoolDown) {
+            player.attackingCooldown++;
+            if (player.attackingCooldown >= 10) {
+                player.isInAttackCoolDown = false;
+                player.attackingCooldown = 0;
+            }
+        }
+
 
     }
 
