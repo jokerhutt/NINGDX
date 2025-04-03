@@ -37,6 +37,7 @@ public class MainScreen implements Screen {
 
     public NPC currentNPC;
     public boolean isInDialogue = false;
+    public boolean isViewingInventory;
 
     public HUD hud;
     public Player player;
@@ -72,7 +73,9 @@ public class MainScreen implements Screen {
         if (!isInDialogue) {
             player.update(delta);
             updateEntityArrays(delta);
+            player.playerKeyHandler.toggleInventory();
         } else {
+            isViewingInventory = false;
             player.playerKeyHandler.checkUpdateDialogue();
         }
         renderer.setView(mainCamera.camera);

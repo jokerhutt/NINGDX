@@ -37,7 +37,7 @@ public class MapLoader {
                         r.x * Constants.SCALE,
                         r.y * Constants.SCALE,
                         r.width * Constants.SCALE,
-                        r.height * Constants.SCALE // no scaling here
+                        r.height * Constants.SCALE
                     );
 
                     newCollisionRects.add(scaled);

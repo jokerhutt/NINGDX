@@ -20,6 +20,7 @@ public class Entity {
     public boolean isInteracting;
     public boolean isInDialogue;
     public Texture speechBubble;
+    public Texture happyEmote;
 
     public Rectangle getCollisionRect() {
         return this.collisionRect;
@@ -32,6 +33,7 @@ public class Entity {
         this.position = new Vector2(x, y);
         this.collisionRect = new Rectangle();
         this.speechBubble = new Texture("emote20.png");
+        this.happyEmote = new Texture("emote27.png");
     }
 
     public Vector2 getPosition () {

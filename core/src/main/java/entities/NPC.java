@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import jokerhut.main.DialogueHandler;
 import jokerhut.main.MainScreen;
+import objects.GameObject;
 
 public class NPC extends Entity {
 
@@ -20,8 +21,12 @@ public class NPC extends Entity {
     boolean isMoving;
     public String name;
     public String type;
+    public boolean isInPurchaseScreen;
+    public GameObject[] inventory;
     public DialogueHandler dialogueHandler;
     boolean movesOnItsOwn = false;
+    public boolean isEmoting;
+    public float emoteTimer;
 
     String idlePath;
     String walkingPath;
@@ -35,6 +40,7 @@ public class NPC extends Entity {
         this.hitboxWidth = 0.8f;
         this.hitboxHeight = 0.5f;
         this.speed = 1f;
+        this.emoteTimer = 0f;
     }
 
     public void setupSprite (TextureRegion direction) {
@@ -54,11 +60,32 @@ public class NPC extends Entity {
 
             batch.draw(this.speechBubble, bubbleX, bubbleY, bubbleWidth, bubbleHeight);
         }
+        if (isEmoting) {
+            float bubbleWidth = 0.5f;
+            float bubbleHeight = 0.5f;
+
+            float bubbleX = sprite.getX() + sprite.getWidth() / 2.2f - bubbleWidth / 2f;
+            float bubbleY = sprite.getY() + (sprite.getHeight() / 1f);
+
+            batch.draw(this.happyEmote, bubbleX, bubbleY, bubbleWidth, bubbleHeight);
+        }
     }
 
     public void update (float delta) {
         if (this.movesOnItsOwn) {
             setAction(delta);
+        }
+    }
+
+    public void runEmoting () {
+        if (isEmoting) {
+            System.out.println(emoteTimer);
+            if (emoteTimer >= 100f) {
+                isEmoting = false;
+                emoteTimer = 0f;
+            } else {
+                emoteTimer++;
+            }
         }
     }
 
@@ -96,11 +123,6 @@ public class NPC extends Entity {
                 chooseRandomDirection();
                 actionDuration = MathUtils.random(1f, 4f);
             } else {
-                if (velocity.x > 0) {
-                    sprite.setFlip(true, false);
-                } else if (velocity.x < 0) {
-                    sprite.setFlip(false, false);
-                }
                 velocity.set(0, 0); // stop
                 actionDuration = MathUtils.random(1f, 10f);
             }
@@ -149,12 +171,6 @@ public class NPC extends Entity {
         }
         if (velocity.y != 0) {
             lastDirectionY = velocity.y;
-        }
-
-        if (lastDirectionX < 0) {
-            sprite.setFlip(true, false);
-        } else {
-            sprite.setFlip(false, false);
         }
     }
 

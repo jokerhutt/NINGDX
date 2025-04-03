@@ -21,11 +21,12 @@ public class NPC_Guard extends NPC {
             hitboxWidth,
             hitboxHeight
         );
-        this.dialogueHandler = new DialogueHandler(this, screen, setupLines());
+        this.dialogueHandler = new DialogueHandler(this, screen);
+        setupLines();
 
     }
 
-    public String[] setupLines () {
+    public void setupLines () {
 
         String[] npcLines = new String[4];
         int i = 0;
@@ -38,7 +39,16 @@ public class NPC_Guard extends NPC {
         npcLines[i] = "You are not permitted to enter";
         i++;
 
-        return npcLines;
+        dialogueHandler.dialogueSets.put("intro", new String[] {
+            "You can not pass",
+            "Move along.",
+            "Stop bothering me..."
+        });
+
+        dialogueHandler.dialogueSets.put("general", new String[] {
+            "You are not permitted to enter.",
+            "top bothering me...",
+        });
 
     }
 

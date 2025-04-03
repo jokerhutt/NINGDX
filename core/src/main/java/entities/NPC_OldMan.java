@@ -1,5 +1,6 @@
 package entities;
 
+import com.badlogic.gdx.graphics.Texture;
 import jokerhut.main.DialogueHandler;
 import jokerhut.main.MainScreen;
 
@@ -10,27 +11,27 @@ public class NPC_OldMan extends NPC{
         this.name = "oldMan";
         this.idlePath = "oldManIdle.png";
         this.walkingPath = "oldManWalk.png";
+        this.portrait = new Texture("oldManPortrait.png");
         setupAnimation(idlePath, walkingPath);
         setupSprite(idleDown);
         this.lastDirectionY = -1f;
         this.movesOnItsOwn = true;
-        this.dialogueHandler = new DialogueHandler(this, screen, setupLines());
+        this.dialogueHandler = new DialogueHandler(this, screen);
+        setupLines();
     }
 
-    public String[] setupLines () {
+    public void setupLines () {
 
-        String[] npcLines = new String[4];
-        int i = 0;
-        npcLines[i] = "Eh?";
-        i++;
-        npcLines[i] = "You look new...";
-        i++;
-        npcLines[i] = "You should get something to eat";
-        i++;
-        npcLines[i] = "Visit Gilbert at the market";
-        i++;
+        dialogueHandler.dialogueSets.put("intro", new String[] {
+            "Eh?",
+            "You look new....",
+            "You should get something to eat"
+        });
 
-        return npcLines;
+        dialogueHandler.dialogueSets.put("general", new String[] {
+            "Visit Gilbert at the market.",
+            "I have work to do, goodbye.",
+        });
 
     }
 

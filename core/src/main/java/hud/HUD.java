@@ -27,22 +27,69 @@ public class HUD {
     protected Texture selectedSlotTexture;
     TextureRegionDrawable selectedSlotDrawable;
     TextureRegionDrawable slotDrawable;
-    protected Texture soundIcon;
+
     MainScreen screen;
     private BitmapFont font = new BitmapFont();
     Texture dialogueBoxTexture = new Texture("DialogBoxFaceset.png");
 
+    PurchaseItemsActor purchaseItemsActor;
+    CoinActor coinDisplay;
+    InventoryActor inventoryActor;
+    Table coinTable;
+    public int coinCount;
+
     public HUD(Viewport viewport, SpriteBatch batch, MainScreen screen) {
+
         stage = new Stage(new ScreenViewport(), batch);
         this.screen = screen;
-
         Gdx.input.setInputProcessor(stage);
+
+        //Initialise Coins
+        coinDisplay = new CoinActor(screen, 'M');
+        coinTable = new Table();
+        coinTable.top().right().pad(10).padRight(30);
+        coinTable.setFillParent(true);
+        coinTable.add(coinDisplay).right().padTop(10).padRight(10);
+        stage.addActor(coinTable);
+
+        inventoryActor = new InventoryActor(screen);
+        inventoryActor.setFillParent(true);
+        stage.addActor(inventoryActor);
+
+        purchaseItemsActor = new PurchaseItemsActor(screen);
+        purchaseItemsActor.setFillParent(true);
+        stage.addActor(purchaseItemsActor);
+
+
+
     }
 
     public void render(float delta) {
         stage.getViewport().apply();
+        updateShopVisibility();
+        if (screen.currentNPC != null && screen.currentNPC.isEmoting) {
+            screen.currentNPC.runEmoting();
+        }
         stage.act(delta);
         stage.draw();
+    }
+
+    public void updateShopVisibility() {
+        if (screen.currentNPC != null && screen.currentNPC.type == "merchant" && screen.currentNPC.isInPurchaseScreen) {
+            purchaseItemsActor.setVisible(true);
+            inventoryActor.setVisible(true);
+            inventoryActor.refreshInventory();
+            purchaseItemsActor.setInventoryItems();
+            purchaseItemsActor.setVendorNameTable();
+            purchaseItemsActor.coinActor.coinLabel.setText(screen.hud.coinCount + " G");
+        } else if (screen.isViewingInventory) {
+            purchaseItemsActor.setVisible(false);
+            inventoryActor.setVisible(true);
+            inventoryActor.refreshInventory();
+        } else {
+            inventoryActor.setVisible(false);
+            purchaseItemsActor.setVisible(false);
+        }
     }
 
     public void resize(int width, int height) {
@@ -79,6 +126,7 @@ public class HUD {
         float lineTextY = textY - 20;
 
         font.draw(batch, line, lineTextX, lineTextY);
+
 
     }
 

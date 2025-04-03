@@ -1,10 +1,14 @@
 package entities;
 
+import com.badlogic.gdx.Game;
 import com.badlogic.gdx.graphics.Texture;
 import jokerhut.main.DialogueHandler;
 import jokerhut.main.MainScreen;
+import objects.GameObject;
+import objects.OBJ_Food;
 
 public class NPC_Gilbert extends NPC {
+
 
     public NPC_Gilbert (float x, float y, MainScreen screen) {
         super(x, y, screen);
@@ -23,23 +27,36 @@ public class NPC_Gilbert extends NPC {
             hitboxWidth,
             hitboxHeight
         );
-        this.dialogueHandler = new DialogueHandler(this, screen, setupLines());
+        this.inventory = new GameObject[12];
+        addItemsForSale();
+        this.dialogueHandler = new DialogueHandler(this, screen);
+        setupLines();
     }
 
-    public String[] setupLines () {
+    public void setupLines () {
 
-        String[] npcLines = new String[4];
-        int i = 0;
-        npcLines[i] = "Hello there!";
-        i++;
-        npcLines[i] = "I'm Gilbert the merchant";
-        i++;
-        npcLines[i] = "Would you like to buy anything?";
-        i++;
-        npcLines[i] = "Here is what i have to offer!";
-        i++;
+        dialogueHandler.dialogueSets.put("intro", new String[] {
+            "Hello there!",
+            "I am Gilbert the merchant.",
+            "Come visit my shop anytime."
+        });
 
-        return npcLines;
+        dialogueHandler.dialogueSets.put("general", new String[] {
+            "The weather's nice today.",
+            "Heard any good rumors lately?",
+            "Be careful out there."
+        });
+
+    }
+
+    public void addItemsForSale () {
+
+        this.inventory[0] = new OBJ_Food("shrimp");
+        this.inventory[1] = new OBJ_Food("sushi");
+        this.inventory[2] = new OBJ_Food("honey");
+        this.inventory[3] = new OBJ_Food("onigiri");
+        this.inventory[4] = new OBJ_Food("tealeaf");
+        this.inventory[5] = new OBJ_Food("fish");
 
     }
 

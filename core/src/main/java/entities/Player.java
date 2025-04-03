@@ -20,6 +20,8 @@ public class Player extends Entity{
     AnimationHandler playerAnimationHandler;
     public float animationTimer = 0f;
     public boolean moving;
+    public int coins;
+    public Inventory inventory;
 
     public Rectangle dialogueBox;
 
@@ -43,6 +45,8 @@ public class Player extends Entity{
         this.hitboxWidth = 0.8f;
         this.hitboxHeight = 0.5f;
         this.speed = 6f;
+        this.coins = 10;
+        this.inventory = new Inventory(this);
 
 
     }
@@ -172,7 +176,7 @@ public class Player extends Entity{
 
     public void updateDialogueCollisionZone () {
         float offset = 1f;
-        float boxSize = 0.8f;
+        float boxSize = 1.5f;
 
         float dx = 0;
         float dy = 0;
