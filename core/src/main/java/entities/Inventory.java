@@ -19,6 +19,8 @@ public class Inventory {
 
     public void initialiseInventory () {
         this.inventoryArray[0] = new OBJ_Weapon("stick");
+        this.inventoryArray[1] = new OBJ_Weapon("lance");
+        this.inventoryArray[2] = new OBJ_Weapon("sword");
     }
 
     public void previousItem () {

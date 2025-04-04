@@ -32,8 +32,10 @@ public class InventorySlotUI extends Stack {
             itemImage.setScaling(Scaling.stretch);
 
             Container<Image> container = new Container<>(itemImage);
-            if (inventoryItem.type == "weapon" && inventoryItem.name == "stick") {
+            if (inventoryItem.type.equals("weapon") && inventoryItem.name == "stick") {
                 container.size(9, 48);
+            } else if (inventoryItem.type.equals("weapon")){
+                container.size(18, 48);
             } else {
                 container.size(48, 48);
             }

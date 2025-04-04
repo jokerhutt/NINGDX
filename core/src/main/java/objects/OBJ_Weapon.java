@@ -21,6 +21,18 @@ public class OBJ_Weapon extends GameObject{
                 this.count = 1;
                 this.countable = false;
                 break;
+            case "lance":
+                this.imagePath = "lance.png";
+                this.cost = 5;
+                this.count = 1;
+                this.countable = false;
+                break;
+            case "sword":
+                this.imagePath = "swordSprite.png";
+                this.cost = 5;
+                this.count = 1;
+                this.countable = false;
+                break;
         }
 
     }

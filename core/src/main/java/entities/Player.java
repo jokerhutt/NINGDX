@@ -14,6 +14,8 @@ import jokerhut.main.KeyHandler;
 import jokerhut.main.MainScreen;
 import utils.DirectionUtils;
 
+import java.util.Map;
+
 public class Player extends Entity{
 
     public TextureRegion idleDown, idleUp, idleLeft, idleRight;
@@ -23,12 +25,23 @@ public class Player extends Entity{
     public float animationTimer = 0f;
 
     Texture stickInHandTexture = new Texture("stickInHand.png");
-    TextureRegion weaponRegion;
+    Texture lanceInHandTexture = new Texture("lanceInHand.png");
+    Texture swordInHandTexture = new Texture("swordInHand.png");
+    TextureRegion stickInHandRegion;
+    TextureRegion lanceInHandRegion;
+    TextureRegion swordInHandRegion;
     public boolean isAttacking;
     public float attackingTimer;
     public float attackingCooldown;
     public boolean moving;
     public boolean isInAttackCoolDown = false;
+
+    private final Map<String, Vector2> weaponAnchors = Map.of(
+        "right", new Vector2(1.35f, 0.25f),
+        "left", new Vector2(-0.35f, 0.25f),
+        "up", new Vector2(0.3f, 1.35f),
+        "down", new Vector2(0.2f, -0.35f)
+    );
 
     Sprite weaponSprite;
 
@@ -48,7 +61,9 @@ public class Player extends Entity{
         super(x, y);
         this.screen = screen;
         setupPlayerAnimation();
-        weaponRegion = new TextureRegion(stickInHandTexture);
+        stickInHandRegion = new TextureRegion(stickInHandTexture);
+        lanceInHandRegion = new TextureRegion(lanceInHandTexture);
+        swordInHandRegion = new TextureRegion(swordInHandTexture);
         playerAnimationHandler = new AnimationHandler(this);
         sprite = new Sprite(idleDown);
         sprite.setSize(1f, 1f);
@@ -59,7 +74,7 @@ public class Player extends Entity{
         sprite.setRegion(idleDown);
         this.dialogueBox = new Rectangle();
         this.moving = false;
-        weaponSprite = new Sprite(weaponRegion);
+        weaponSprite = new Sprite(stickInHandTexture);
         weaponSprite.setSize(9f / Constants.TILESIZE, 36 / Constants.TILESIZE);
         weaponSprite.setOriginCenter(); // Important: so it rotates around the middle
 
@@ -100,31 +115,57 @@ public class Player extends Entity{
         return this.speed;
     }
 
-    public void updateWeaponSprite () {
+    public void updateWeaponSprite() {
+        if (inventory.currentItem == null) return;
 
-        char spriteDirection = 'U';
+        switch (inventory.currentItem.name) {
+            case "stick":
+                weaponSprite.setRegion(stickInHandRegion);
+                weaponSprite.setSize(9f / Constants.TILESIZE, 36 / Constants.TILESIZE);
+                break;
+            case "lance":
+                weaponSprite.setRegion(lanceInHandRegion);
+                weaponSprite.setSize(18f / Constants.TILESIZE, 48 / Constants.TILESIZE);
+                break;
+            case "sword":
+                weaponSprite.setRegion(swordInHandRegion);
+                weaponSprite.setSize(18f / Constants.TILESIZE, 33 / Constants.TILESIZE);
+                break;
+        }
 
-        if (lastDirection.x == 1 && lastDirection.y == 0) {
-            spriteDirection = 'R';
-            weaponSprite.setRotation(-90f);
-        } else if (lastDirection.x == -1 && lastDirection.y == 0) {
-            spriteDirection = 'L';
-            weaponSprite.setRotation(-270);
-        } else if (lastDirection.y == -1 && lastDirection.x == 0) {
-            spriteDirection = 'D';
-            weaponSprite.setRotation(-180);
-        } else if (lastDirection.y == 1 && lastDirection.x == 0) {
-            spriteDirection = 'U';
-            weaponSprite.setRotation(0);
+        weaponSprite.setOriginCenter();
+
+        String dir = "down";
+        if (lastDirection.x == 1) dir = "right";
+        else if (lastDirection.x == -1) dir = "left";
+        else if (lastDirection.y == 1) dir = "up";
+
+        // Get the anchor point
+        Vector2 anchor = weaponAnchors.get(dir);
+
+        // Set rotation
+        switch (dir) {
+            case "right":
+                weaponSprite.setRotation(90f);
+                break;
+            case "left":
+                weaponSprite.setRotation(270f);
+                break;
+            case "up":
+                weaponSprite.setRotation(180f);
+                break;
+            case "down":
+                weaponSprite.setRotation(0f);
+                break;
         }
 
         weaponSprite.setPosition(
-            DirectionUtils.calculateSpriteOffset(
-                spriteDirection, 'X', position.x, position.y, weaponSprite.getHeight(), weaponSprite.getWidth()),
-            DirectionUtils.calculateSpriteOffset(
-                spriteDirection, 'Y', position.x, position.y, weaponSprite.getHeight(), weaponSprite.getWidth())
-            );
+            position.x + anchor.x - weaponSprite.getWidth() / 2f,
+            position.y + anchor.y - weaponSprite.getHeight() / 2f
+        );
+
     }
+
 
     public void setupPlayerAnimation () {
         Texture sheet = new Texture("Idle.png");
@@ -266,6 +307,7 @@ public class Player extends Entity{
 
 
     public void update(float delta) {
+
         handleMovement(delta);
     }
 
