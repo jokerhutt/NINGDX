@@ -1,6 +1,8 @@
 package entities;
 
 import Constants.Constants;
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Sprite;
@@ -8,11 +10,13 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Array;
 import jokerhut.main.AnimationHandler;
 import jokerhut.main.CollisionChecker;
 import jokerhut.main.KeyHandler;
 import jokerhut.main.MainScreen;
 import utils.DirectionUtils;
+import utils.MovementUtils;
 
 import java.util.Map;
 
@@ -21,7 +25,8 @@ public class Player extends Entity{
     public TextureRegion idleDown, idleUp, idleLeft, idleRight;
     public TextureRegion attackDown, attackUp, attackLeft, attackRight;
     public Animation<TextureRegion> walkDown, walkUp, walkLeft, walkRight;
-    AnimationHandler playerAnimationHandler;
+    public AnimationHandler playerAnimationHandler;
+    public boolean hasTriggeredFx = false;
     public float animationTimer = 0f;
 
     Texture stickInHandTexture = new Texture("stickInHand.png");
@@ -51,8 +56,10 @@ public class Player extends Entity{
     public Inventory inventory;
 
     public Rectangle dialogueBox;
+    public Rectangle meleeAttackBox;
 
     public final Vector2 futurePosition = new Vector2();
+    public Vector2 intendedDirection = new Vector2();
 
     public KeyHandler playerKeyHandler;
     MainScreen screen;
@@ -64,15 +71,18 @@ public class Player extends Entity{
         stickInHandRegion = new TextureRegion(stickInHandTexture);
         lanceInHandRegion = new TextureRegion(lanceInHandTexture);
         swordInHandRegion = new TextureRegion(swordInHandTexture);
-        playerAnimationHandler = new AnimationHandler(this);
         sprite = new Sprite(idleDown);
         sprite.setSize(1f, 1f);
+
+        this.health = 6;
         this.attackingTimer = 0f;
         this.attackingCooldown = 0f;
         this.isAttacking = false;
         sprite.setPosition(this.position.x, this.position.y);
         sprite.setRegion(idleDown);
+        playerAnimationHandler = new AnimationHandler(this);
         this.dialogueBox = new Rectangle();
+        this.meleeAttackBox = new Rectangle();
         this.moving = false;
         weaponSprite = new Sprite(stickInHandTexture);
         weaponSprite.setSize(9f / Constants.TILESIZE, 36 / Constants.TILESIZE);
@@ -168,6 +178,7 @@ public class Player extends Entity{
 
 
     public void setupPlayerAnimation () {
+
         Texture sheet = new Texture("Idle.png");
         TextureRegion[][] split = TextureRegion.split(sheet, 16, 16);
 
@@ -190,6 +201,7 @@ public class Player extends Entity{
         attackDown  = splitAttackingSheet[0][0];
         attackLeft  = splitAttackingSheet[0][2];
         attackRight = splitAttackingSheet[0][3];
+
     }
 
     public void handleMovement (float delta) {
@@ -197,28 +209,169 @@ public class Player extends Entity{
         animationTimer += delta;
         velocity.set(0, 0);
         moving = false;
+        intendedDirection.set(0, 0);
 
-        //Only Sets Direction/Velocity!!
-        if (!playerKeyHandler.handleDiagonalMovement()) {
-            playerKeyHandler.handlePlayerCardinalMovement();
-        }
+        //DIRECTION BASED METHODS
+        handleInput();
+        applyNormalizedVelocityFromDirection();
 
-
-        if (!moving && !isAttacking) {
-            animationTimer = 0f;
-            playerAnimationHandler.handleIdleAnimation();
-        }
-
+        //ACTION BASED METHODS
         playerKeyHandler.handleAttacking(delta);
 
-        handleCollisionAndUpdatePlayer(delta);
+        //APPLYING MOVEMENT METHODS
+        if (moving) {
+            applySlidingMovement(velocity, delta);
+        }
 
-        playerKeyHandler.checkXAndY(this);
+        //ANIMATION METHODS
+        updateSpriteAnimation();
+
+        //COLLISION BOX & SPRITE POSITION UPDATE METHODS
+        updateCollisionBoxes();
+
+        playerKeyHandler.enterDialogue();
+
+        sprite.setPosition(position.x, position.y);
+
+//        animationTimer += delta;
+//        velocity.set(0, 0);
+//        moving = false;
+//
+//        //Only Sets Direction/Velocity!!
+//        if (!playerKeyHandler.handleDiagonalMovement()) {
+//            playerKeyHandler.handlePlayerCardinalMovement();
+//        }
+//
+//
+//        if (!moving && !isAttacking) {
+//            animationTimer = 0f;
+//            playerAnimationHandler.handleIdleAnimation();
+//        }
+//
+//        playerKeyHandler.handleAttacking(delta);
+//
+//        handleCollisionAndUpdatePlayer(delta);
+//
+//        playerKeyHandler.checkXAndY(this);
+
 
 
     }
 
+    /// START
+    ///
+
+    public void updateCollisionBoxes () {
+        updateDialogueCollisionZone();
+        screen.collisionChecker.checkEntityDialogueCollision(screen.npcArray, this);
+        updateMeleeAttackZone();
+    }
+
+    public void updateSpriteAnimation () {
+
+        if (moving && !isAttacking) {
+
+            if (velocity.y > 0) {
+                sprite.setRegion(walkUp.getKeyFrame(animationTimer, true));
+            } else if (velocity.y < 0) {
+                sprite.setRegion(walkDown.getKeyFrame(animationTimer, true));
+            } else if (velocity.x > 0 && velocity.y == 0) {
+                sprite.setRegion(walkRight.getKeyFrame(animationTimer, true));
+            } else if (velocity.x < 0 && velocity.y == 0) {
+                sprite.setRegion(walkLeft.getKeyFrame(animationTimer, true));
+            }
+
+        } else if (!moving && !isAttacking) {
+            if (velocity.y == 1) {
+                sprite.setRegion(idleUp);
+            }
+            else if (velocity.x == -1) {
+                sprite.setRegion(idleLeft);
+            }
+            else if (velocity.y == -1) {
+                sprite.setRegion(idleDown);
+            }
+            else if (velocity.x == 1) {
+                sprite.setRegion(idleRight);
+            }
+        } else if (isAttacking) {
+            if (lastDirection.y > 0) {
+                sprite.setRegion(attackUp);
+            } else if (lastDirection.y < 0) {
+                sprite.setRegion(attackDown);
+            } else if (lastDirection.x > 0) {
+                sprite.setRegion(attackRight);
+            } else if (lastDirection.x < 0) {
+                sprite.setRegion(attackLeft);
+            }
+        }
+
+    }
+
+    public void handleInput () {
+
+        playerKeyHandler.handleSettingCardinalMovement();
+        playerKeyHandler.handleSettingDiagonalMovement();
+
+    }
+
+    public void applyNormalizedVelocityFromDirection () {
+        if (intendedDirection.x != 0 || intendedDirection.y != 0) {
+            velocity.set(intendedDirection).nor().scl(speed);
+        } else {
+            velocity.set(0, 0);
+        }
+        moving = MovementUtils.checkIfMoving(this);
+    }
+
+    public boolean applySlidingMovement(Vector2 moveVec, float delta) {
+        Vector2 move = moveVec.cpy().scl(delta);
+        boolean moved = false;
+
+        if (!willCollideAt(position.x + move.x, position.y + move.y)) {
+            position.add(move);
+            moved = true;
+        } else {
+            if (!willCollideAt(position.x + move.x, position.y)) {
+                position.x += move.x;
+                moved = true;
+            }
+            if (!willCollideAt(position.x, position.y + move.y)) {
+                position.y += move.y;
+                moved = true;
+            }
+        }
+
+        return moved;
+    }
+
+    public boolean willCollideAt(float testX, float testY) {
+        setFutureCollisionRect(testX, testY);
+        for (Rectangle wall : screen.wallCollisionRects) {
+            if (collisionRect.overlaps(wall)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void setFutureCollisionRect (float futureX, float futureY) {
+        collisionRect.set(
+            futureX + (sprite.getWidth() - hitboxWidth) / 2f,
+            futureY,
+            hitboxWidth,
+            hitboxHeight
+        );
+    }
+
+
+    /// END
+
     public void handleCollisionAndUpdatePlayer (float delta) {
+
+        updateMeleeAttackZone();
+        screen.collisionChecker.checkAttackCollision(screen.enemyArray, this);
+
 
         if (isCollidingOnAxis('x', delta)) {
             position.x = futurePosition.x;
@@ -292,13 +445,43 @@ public class Player extends Entity{
         );
     }
 
+    public void updateMeleeAttackZone () {
+        float offset = 0.8f;
+        float boxSize = 0.8f;
+
+        float dx = 0;
+        float dy = 0;
+
+        if (lastDirection.x > 0) dx = offset;
+        if (lastDirection.x < 0) dx = -offset;
+        if (lastDirection.y > 0) dy = offset;
+        if (lastDirection.y < 0) dy = -offset;
+
+        meleeAttackBox.set(
+            getCenterX() + dx - boxSize / 1.8f,
+            (getCenterY() + dy - boxSize / 1.8f),
+            boxSize,
+            boxSize
+        );
+    }
+
     public boolean checkAllCollisions () {
         if (!screen.collisionChecker.checkStaticObjectCollision(screen.wallCollisionRects, this) &&
-            !screen.collisionChecker.checkEntityCollision(screen.npcArray, this)) {
+            !screen.collisionChecker.checkEntityCollision(screen.npcArray, this) &&
+            !screen.collisionChecker.checkEntityCollision(screen.enemyArray, this)
+        ) {
             return true;
         } else {
             return false;
         }
+    }
+
+    public void handleTakenDamage (Enemy enemyEntity) {
+
+        System.out.println("took damage");
+        health -= enemyEntity.damage;
+        System.out.println("Health is now: " + health);
+
     }
 
 

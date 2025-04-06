@@ -6,12 +6,14 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
 import entities.Entity;
 import entities.NPC;
+import fx.EffectAnimation;
 import jokerhut.main.MainScreen;
 
 public class CollisionDebug {
@@ -25,6 +27,7 @@ public class CollisionDebug {
     public static boolean SHOWFARMABLEDEBUG = true;
     public static boolean SHOWFARMINGRANGEDEBUG = true;
     public static boolean DRAWTILEGRID = true;
+    public static boolean DRAWMELEEATTACKZONE = true;
 
     MainScreen screen;
     ShapeRenderer shapeRenderer;
@@ -70,6 +73,8 @@ public class CollisionDebug {
         shapeRenderer.end();
     }
 
+
+
     public void playerDialogueBoxDebug () {
         shapeRenderer.setProjectionMatrix(screen.mainCamera.camera.combined);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
@@ -80,6 +85,21 @@ public class CollisionDebug {
             screen.player.dialogueBox.y,
             screen.player.dialogueBox.width,
             screen.player.dialogueBox.height
+        );
+
+        shapeRenderer.end();
+    }
+
+    public void playerMeleeZoneDebug () {
+        shapeRenderer.setProjectionMatrix(screen.mainCamera.camera.combined);
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
+        shapeRenderer.setColor(Color.PINK);
+
+        shapeRenderer.rect(
+            screen.player.meleeAttackBox.x,
+            screen.player.meleeAttackBox.y,
+            screen.player.meleeAttackBox.width,
+            screen.player.meleeAttackBox.height
         );
 
         shapeRenderer.end();
@@ -99,7 +119,7 @@ public class CollisionDebug {
         shapeRenderer.end();
     }
 
-    public void EntityCollisionDebug (Array<Entity> entityArray) {
+    public void EntityCollisionDebug (Array<? extends Entity> entityArray) {
 
         shapeRenderer.setProjectionMatrix(screen.mainCamera.camera.combined);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);

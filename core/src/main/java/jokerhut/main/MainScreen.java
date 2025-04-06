@@ -34,6 +34,7 @@ public class MainScreen implements Screen {
     CollisionDebug collisionDebugger;
     MusicHandler musicHandler;
     public Array<Entity> npcArray;
+    public Array<Enemy> enemyArray;
 
     public NPC currentNPC;
     public boolean isInDialogue = false;
@@ -57,6 +58,7 @@ public class MainScreen implements Screen {
         wallCollisionRects = mapLoader.createStaticCollisionRects("Collision");
         this.collisionChecker = new CollisionChecker();
         this.npcArray = setupNpcs();
+        this.enemyArray = setupEnemies();
         batch = new SpriteBatch();
 
         player = new Player(5, 15, this);
@@ -73,17 +75,23 @@ public class MainScreen implements Screen {
         if (!isInDialogue) {
             player.update(delta);
             updateEntityArrays(delta);
+            updateEnemyArrays(delta);
             player.playerKeyHandler.toggleInventory();
         } else {
             isViewingInventory = false;
             player.playerKeyHandler.checkUpdateDialogue();
         }
+        player.playerAnimationHandler.playFxAnimation(delta);
         renderer.setView(mainCamera.camera);
         batch.setProjectionMatrix(mainCamera.camera.combined); // sync batch with camera
         renderer.render();
         batch.begin();
-        player.render(batch);
         renderEntityArrays(batch);
+        renderEnemyArrays(batch);
+        player.render(batch);
+        if (player.isAttacking) {
+            player.playerAnimationHandler.renderCurrentAnimation(batch);
+        }
         batch.end();
         runScreenDebugMethods();
         hud.render(delta);
@@ -109,6 +117,15 @@ public class MainScreen implements Screen {
         return npcArray;
     }
 
+    public Array<Enemy> setupEnemies () {
+        enemyArray = new Array<>();
+        enemyArray.add(new Enemy(3, 7, this));
+        enemyArray.add(new Enemy(3, 5, this));
+
+
+        return enemyArray;
+    }
+
     public void updateEntityArrays (float delta) {
 
         for (Entity npc : npcArray) {
@@ -124,6 +141,26 @@ public class MainScreen implements Screen {
         for (Entity npc : npcArray) {
             if (npc != null) {
                 npc.render(batch);
+            }
+        }
+
+    }
+
+    public void updateEnemyArrays (float delta) {
+
+        for (Enemy enemy : enemyArray) {
+            if (enemy != null) {
+                enemy.update(delta);
+            }
+        }
+
+    }
+
+    public void renderEnemyArrays (SpriteBatch batch) {
+
+        for (Enemy enemy : enemyArray) {
+            if (enemy != null) {
+                enemy.render(batch);
             }
         }
 
@@ -166,6 +203,9 @@ public class MainScreen implements Screen {
         if (CollisionDebug.SHOWNPCCOLLISION) {
             collisionDebugger.EntityCollisionDebug(npcArray);
         }
+        if (CollisionDebug.SHOWNPCCOLLISION) {
+            collisionDebugger.EntityCollisionDebug(enemyArray);
+        }
         if (CollisionDebug.SHOWDIALOGUECOLLISION) {
             collisionDebugger.playerDialogueBoxDebug();
         }
@@ -175,6 +215,7 @@ public class MainScreen implements Screen {
             int mapHeight = map.getProperties().get("height", Integer.class);
             collisionDebugger.drawTileGrid(mapWidth, mapHeight, 1f);
         }
+        collisionDebugger.playerMeleeZoneDebug();
 
 
 

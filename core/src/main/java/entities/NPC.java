@@ -6,11 +6,16 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
 import jokerhut.main.DialogueHandler;
 import jokerhut.main.MainScreen;
 import objects.GameObject;
 
 public class NPC extends Entity {
+
+    public float invincibilityTimer = 0f;
+    public boolean isInvincible = true;
 
     MainScreen screen;
     public float lastDirectionX = 0f;
@@ -27,6 +32,10 @@ public class NPC extends Entity {
     boolean movesOnItsOwn = false;
     public boolean isEmoting;
     public float emoteTimer;
+    public final Vector2 futurePosition = new Vector2();
+
+    public Vector2 knockback = new Vector2();
+    public float knockbackTime = 0f;
 
     String idlePath;
     String walkingPath;
@@ -39,7 +48,8 @@ public class NPC extends Entity {
         this.screen = screen;
         this.hitboxWidth = 0.8f;
         this.hitboxHeight = 0.5f;
-        this.speed = 1f;
+        this.speed = 0.5f;
+        this.health = 6;
         this.emoteTimer = 0f;
     }
 
@@ -48,6 +58,46 @@ public class NPC extends Entity {
         sprite.setSize(1f, 1f);
         sprite.setPosition(this.position.x, this.position.y);
         sprite.setRegion(direction);
+    }
+
+    public void takeDamage (float damage, Entity entity) {
+
+        if (!this.isInvincible && invincibilityTimer == 0) {
+            this.isInvincible = true;
+            this.health -= damage;
+            applyKnockback(entity.getPosition(), 4f, 0.2f);
+            System.out.println("attacked! Health is now " + health);
+        } else if (this.isInvincible && invincibilityTimer >= 5f) {
+            this.isInvincible = false;
+            this.invincibilityTimer = 0;
+        } else if (this.isInvincible) {
+            invincibilityTimer ++;
+        }
+
+    }
+
+    public boolean isKnockbackCollidingOnAxis(Vector2 knockVec, float delta) {
+        // Copy position so we don't affect the real one
+        Vector2 testPos = position.cpy().add(knockVec.x * delta, knockVec.y * delta);
+
+        collisionRect.set(
+            testPos.x + (sprite.getWidth() - hitboxWidth) / 2f,
+            testPos.y,
+            hitboxWidth,
+            hitboxHeight
+        );
+
+        return checkAllCollisionsForNPC();
+    }
+
+    public void applyKnockback(Vector2 from, float strength, float duration) {
+        Vector2 direction = new Vector2(position).sub(from).nor();
+        direction.scl(1f);
+
+        knockback.set(direction.scl(strength));
+        knockbackTime = duration;
+        System.out.println("Knockback from: " + from + " to " + position);
+        System.out.println("Knockback direction: " + knockback);
     }
 
     public void drawSpeechBubble (SpriteBatch batch) {
@@ -124,7 +174,7 @@ public class NPC extends Entity {
                 actionDuration = MathUtils.random(1f, 4f);
             } else {
                 velocity.set(0, 0); // stop
-                actionDuration = MathUtils.random(1f, 10f);
+                actionDuration = MathUtils.random(1f, 2f);
             }
         }
 
@@ -133,6 +183,34 @@ public class NPC extends Entity {
                 !screen.collisionChecker.checkEntityCollisionWithPlayer(this, screen.player)
             )
             {
+
+                futurePosition.set(
+                    position.x + velocity.x * speed * delta,
+                    position.y + velocity.y * speed * delta
+                );
+
+
+                collisionRect.set(
+                    futurePosition.x + (sprite.getWidth() - hitboxWidth) / 2f,
+                    futurePosition.y,
+                    hitboxWidth,
+                    hitboxHeight
+                );
+
+                if (this instanceof Enemy) {
+                    ((Enemy) this).hitboxRectangle.set(
+                        sprite.getX(),
+                        sprite.getY(),
+                        sprite.getWidth(),
+                        sprite.getHeight()
+                    );
+                }
+
+                if (!checkAllCollisionsForNPC()) {
+                    position.set(futurePosition);
+                } else {
+                    velocity.setZero();
+                }
 
                 if (velocity.y > 0) {
                     this.sprite.setRegion(walkUp.getKeyFrame(actionTimer, true));
@@ -171,6 +249,17 @@ public class NPC extends Entity {
         }
         if (velocity.y != 0) {
             lastDirectionY = velocity.y;
+        }
+    }
+
+    public boolean checkAllCollisionsForNPC () {
+        if (!screen.collisionChecker.checkStaticObjectCollision(screen.wallCollisionRects, this) &&
+            !screen.collisionChecker.checkEntityCollisionWithPlayer(this, screen.player) &&
+            !screen.collisionChecker.checkEntityCollision(screen.npcArray, this)
+        ) {
+            return false;
+        } else {
+            return true;
         }
     }
 

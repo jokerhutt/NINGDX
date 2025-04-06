@@ -2,6 +2,7 @@ package jokerhut.main;
 
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
+import entities.Enemy;
 import entities.Entity;
 import entities.Player;
 
@@ -20,23 +21,46 @@ public class CollisionChecker {
 
     }
 
-    public boolean checkEntityCollision (Array<Entity> entities, Entity callingEntity) {
+    public boolean checkStaticObjectCollision (Array<Rectangle> collisionRs, Rectangle testRect) {
 
         boolean doesCollide = false;
-        for (Entity entity : entities) {
-            if (entity.collisionRect.overlaps(callingEntity.collisionRect)) {
+        for (Rectangle rect : collisionRs) {
+            if (rect.overlaps(testRect)) {
                 doesCollide = true;
                 break;
             }
         }
         return doesCollide;
+
     }
 
-    public boolean checkEntityCollisionWithPlayer (Entity entity, Entity player) {
+    public boolean checkEntityCollision(Array<? extends Entity> entities, Entity callingEntity) {
+        boolean doesCollide = false;
+
+        for (int i = 0; i < entities.size; i++) {
+            Entity entity = entities.get(i);
+            if (entity == callingEntity) continue; // optional, avoids self-check
+
+            if (entity.collisionRect.overlaps(callingEntity.collisionRect)) {
+                if (entity instanceof Enemy && callingEntity instanceof Player) {
+                    ((Enemy) entity).performAttack((Player) callingEntity);
+                }
+                doesCollide = true;
+                break;
+            }
+        }
+
+        return doesCollide;
+    }
+
+    public boolean checkEntityCollisionWithPlayer (Entity entity, Player player) {
 
         boolean doesCollide = false;
 
         if (player.collisionRect.overlaps(entity.collisionRect)) {
+            if (entity instanceof Enemy) {
+                ((Enemy) entity).performAttack(player);
+            }
             return true;
         }
 
@@ -54,6 +78,18 @@ public class CollisionChecker {
                 }
             }
         }
+    }
+
+    public void checkAttackCollision (Array<Enemy> targetEnemyArray, Player callingPlayer) {
+
+        for (Enemy enemy : targetEnemyArray) {
+
+            if (callingPlayer.meleeAttackBox.overlaps(enemy.collisionRect) && callingPlayer.isAttacking) {
+                enemy.takeDamage(1, callingPlayer);
+            }
+
+        }
+
     }
 
 }

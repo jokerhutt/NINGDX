@@ -17,6 +17,7 @@ public class Entity {
     public Rectangle collisionRect;
     float hitboxHeight;
     float hitboxWidth;
+    public int health;
     public boolean isInteracting;
     public boolean isInDialogue;
     public Texture speechBubble;
