@@ -35,7 +35,7 @@ public class MainScreen implements Screen {
     MusicHandler musicHandler;
     public Array<Entity> npcArray;
     public Array<Enemy> enemyArray;
-
+    public PhysicsHandler physicsHandler;
     public NPC currentNPC;
     public boolean isInDialogue = false;
     public boolean isViewingInventory;
@@ -60,7 +60,7 @@ public class MainScreen implements Screen {
         this.npcArray = setupNpcs();
         this.enemyArray = setupEnemies();
         batch = new SpriteBatch();
-
+        this.physicsHandler = new PhysicsHandler(this);
         player = new Player(5, 15, this);
         musicHandler.playVillageMusic();
         hud = new HUD(new ScreenViewport(), batch, this);
@@ -81,7 +81,7 @@ public class MainScreen implements Screen {
             isViewingInventory = false;
             player.playerKeyHandler.checkUpdateDialogue();
         }
-        player.playerAnimationHandler.playFxAnimation(delta);
+        player.animationHandler.playFxAnimation(delta, player);
         renderer.setView(mainCamera.camera);
         batch.setProjectionMatrix(mainCamera.camera.combined); // sync batch with camera
         renderer.render();
@@ -90,7 +90,7 @@ public class MainScreen implements Screen {
         renderEnemyArrays(batch);
         player.render(batch);
         if (player.isAttacking) {
-            player.playerAnimationHandler.renderCurrentAnimation(batch);
+            player.animationHandler.renderCurrentAnimation(player, batch);
         }
         batch.end();
         runScreenDebugMethods();

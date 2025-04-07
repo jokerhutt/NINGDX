@@ -14,8 +14,6 @@ public class Enemy extends NPC {
     public boolean isAttacking;
     public float attackCooldown;
 
-    public Rectangle hitboxRectangle;
-
     public Enemy (float x, float y, MainScreen screen) {
         super(x, y, screen);
         this.name = "redSnake";
@@ -47,68 +45,19 @@ public class Enemy extends NPC {
 
     }
 
-    public void applyTheKnockBackTest () {
 
+    public void handleActions (float delta) {
+        handleAttackCooldown();
+        screen.physicsHandler.handleKnockback(delta, this);
     }
 
-
-
-    @Override
-    public void update(float delta) {
-        super.update(delta); // keeps movement logic intact
-
+    public void handleAttackCooldown () {
         if (isAttacking && attackCooldown > 100f) {
             isAttacking = false;
             attackCooldown = 0f;
         } else if (isAttacking) {
             attackCooldown++;
         }
-
-        if (knockbackTime > 0f) {
-            boolean moved = false;
-
-            Vector2[] directionsToTry = new Vector2[] {
-                knockback,                             // original direction
-                new Vector2(knockback.x, 0),           // X only
-                new Vector2(0, knockback.y),           // Y only
-                new Vector2(-knockback.x, 0),          // opposite X
-                new Vector2(0, -knockback.y),          // opposite Y
-                new Vector2(-knockback.x, -knockback.y) // fully opposite (last resort bounce)
-            };
-
-            for (Vector2 dir : directionsToTry) {
-                if (!isKnockbackCollidingOnAxis(dir, delta)) {
-                    position.x += dir.x * delta;
-                    position.y += dir.y * delta;
-                    System.out.println("Sliding direction: " + dir);
-                    moved = true;
-                    break;
-                }
-            }
-
-            if (!moved) {
-                System.out.println("Fully blocked, no movement");
-            }
-
-            if (moved) {
-                knockbackTime -= delta;
-            }
-
-            if (knockbackTime <= 0f) {
-                knockbackTime = 0f;
-                knockback.setZero();
-            }
-
-            collisionRect.set(
-                position.x + (sprite.getWidth() - hitboxWidth) / 2f,
-                position.y,
-                hitboxWidth,
-                hitboxHeight
-            );
-            hitboxRectangle.set(sprite.getX(), sprite.getY(), sprite.getWidth(), sprite.getHeight());
-            sprite.setPosition(position.x, position.y);
-        }
-
     }
 
     public void performAttack (Player targetPlayer) {

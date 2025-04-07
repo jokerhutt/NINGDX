@@ -1,6 +1,7 @@
 package jokerhut.main;
 
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import entities.Enemy;
 import entities.Entity;
@@ -13,6 +14,9 @@ public class CollisionChecker {
         boolean doesCollide = false;
         for (Rectangle rect : collisionRs) {
             if (rect.overlaps(callingEntity.collisionRect)) {
+                if (callingEntity instanceof Player) {
+                    System.out.println("COOLISION");
+                }
                 doesCollide = true;
                 break;
             }
@@ -65,6 +69,20 @@ public class CollisionChecker {
         }
 
         return doesCollide;
+    }
+
+    public boolean isKnockbackCollidingOnAxis(Vector2 knockVec, float delta, Entity entity) {
+
+        Vector2 testPos = entity.position.cpy().add(knockVec.x * delta, knockVec.y * delta);
+
+        entity.collisionRect.set(
+            testPos.x + (entity.sprite.getWidth() - entity.hitboxWidth) / 2f,
+            testPos.y,
+            entity.hitboxWidth,
+            entity.hitboxHeight
+        );
+
+        return entity.checkAllCollisions();
     }
 
     public void checkEntityDialogueCollision (Array<Entity> entities, Player player) {

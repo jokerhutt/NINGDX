@@ -68,7 +68,7 @@ public class HUD {
         stage.getViewport().apply();
         updateShopVisibility();
         if (screen.currentNPC != null && screen.currentNPC.isEmoting) {
-            screen.currentNPC.runEmoting();
+            screen.currentNPC.emoteHandler.runEmoting();
         }
         stage.act(delta);
         stage.draw();
