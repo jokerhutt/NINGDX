@@ -70,6 +70,13 @@ public class NPC extends Entity {
 
     public void render (SpriteBatch batch) {
         emoteHandler.drawSpeechBubble(batch);
+
+        if (!isInvincible) {
+            sprite.setColor(1, 1, 1, 0.5f); // white tint, 50% opacity
+        } else {
+            sprite.setColor(1, 1, 1, 1f); // full opacity
+        }
+
         sprite.draw(batch);
     }
 

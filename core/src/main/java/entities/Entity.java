@@ -39,6 +39,8 @@ public abstract class Entity {
     public boolean isEmoting;
     public float emoteTimer;
     public Rectangle hitboxRectangle;
+    public boolean isAlive = true;
+    public float deathTimer = 0f;
 
     public Rectangle getCollisionRect() {
         return this.collisionRect;
@@ -116,6 +118,10 @@ public abstract class Entity {
             this.isInvincible = true;
             this.health -= damage;
             screen.physicsHandler.applyKnockback(entity.getPosition(), 4f, 0.2f, this);
+            if (this.health <= 0) {
+                handleDeath();
+                return;
+            }
             System.out.println("attacked! Health is now " + health);
         } else if (this.isInvincible && invincibilityTimer >= 5f) {
             this.isInvincible = false;
@@ -123,6 +129,10 @@ public abstract class Entity {
         } else if (this.isInvincible) {
             invincibilityTimer ++;
         }
+
+    }
+
+    public void handleDeath () {
 
     }
 

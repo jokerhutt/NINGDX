@@ -76,6 +76,7 @@ public class KeyHandler {
                 && player.inventory.currentItem != null
                 && player.inventory.currentItem.type.equals("weapon")) {
                 player.isAttacking = true;
+                player.sfxHandler.playSound("swingweapon");
             }
         }
         if (player.isAttacking) {

@@ -15,6 +15,7 @@ import jokerhut.main.AnimationHandler;
 import jokerhut.main.CollisionChecker;
 import jokerhut.main.KeyHandler;
 import jokerhut.main.MainScreen;
+import sound.SFXHandler;
 import utils.DirectionUtils;
 import utils.MovementUtils;
 
@@ -32,6 +33,10 @@ public class Player extends Entity{
     Texture stickInHandTexture = new Texture("stickInHand.png");
     Texture lanceInHandTexture = new Texture("lanceInHand.png");
     Texture swordInHandTexture = new Texture("swordInHand.png");
+
+    Texture deadTexture = new Texture("Dead.png");
+    public SFXHandler sfxHandler;
+
     TextureRegion stickInHandRegion;
     TextureRegion lanceInHandRegion;
     TextureRegion swordInHandRegion;
@@ -72,7 +77,7 @@ public class Player extends Entity{
         stickInHandRegion = new TextureRegion(stickInHandTexture);
         lanceInHandRegion = new TextureRegion(lanceInHandTexture);
         swordInHandRegion = new TextureRegion(swordInHandTexture);
-
+        sfxHandler = new SFXHandler();
         this.health = 6;
         this.attackingTimer = 0f;
         this.attackingCooldown = 0f;
@@ -128,32 +133,36 @@ public class Player extends Entity{
         moving = false;
         intendedDirection.set(0, 0);
 
-        //DIRECTION BASED METHODS
-        setIntendedAndLastDirection();
-        applyVelocityFromDirection();
-        moving = MovementUtils.checkIfMoving(this);
+        if (isAlive) {
+            //DIRECTION BASED METHODS
+            setIntendedAndLastDirection();
+            applyVelocityFromDirection();
+            moving = MovementUtils.checkIfMoving(this);
 
-        //COLLISION BOX & SPRITE POSITION UPDATE METHODS
-        updateCollisionBoxes();
+            //COLLISION BOX & SPRITE POSITION UPDATE METHODS
+            updateCollisionBoxes();
 
-        //ACTION BASED METHODS
-        playerKeyHandler.handleAttacking();
+            //ACTION BASED METHODS
+            playerKeyHandler.handleAttacking();
 
-        //APPLYING MOVEMENT METHODS
-        if (moving) {
-            applySlidingMovement(velocity, delta);
-            this.hitboxRectangle.set(
-                sprite.getX(),
-                sprite.getY(),
-                sprite.getWidth(),
-                sprite.getHeight()
-            );
+            //APPLYING MOVEMENT METHODS
+            if (moving) {
+                applySlidingMovement(velocity, delta);
+                this.hitboxRectangle.set(
+                    sprite.getX(),
+                    sprite.getY(),
+                    sprite.getWidth(),
+                    sprite.getHeight()
+                );
+            }
+
+            //ANIMATION METHODS
+            updateSpriteAnimation();
+            playerKeyHandler.enterDialogue();
+            sprite.setPosition(position.x, position.y);
+        } else {
+            handleDeadState();
         }
-
-        //ANIMATION METHODS
-        updateSpriteAnimation();
-        playerKeyHandler.enterDialogue();
-        sprite.setPosition(position.x, position.y);
 
     }
 
@@ -278,14 +287,6 @@ public class Player extends Entity{
         );
     }
 
-    public void handleTakenDamage (Enemy enemyEntity) {
-
-        System.out.println("took damage");
-        health -= enemyEntity.damage;
-        System.out.println("Health is now: " + health);
-
-    }
-
     public void updateWeaponSprite() {
         if (inventory.currentItem == null) return;
 
@@ -337,6 +338,33 @@ public class Player extends Entity{
 
     }
 
+    @Override
+    public void handleDeath () {
+        isAlive = false;
+        this.velocity.set(0, 0);
+        this.sprite.setRegion(deadTexture);
+        deathTimer = 0f;
+        handleDeadState();
+    }
+
+    public void handleDeadState() {
+        if (!isAlive) {
+
+            if (deathTimer >= 300) {
+                isAlive = true;
+                this.position.set(5, 15);
+                this.sprite.setPosition(5, 15);
+                this.sprite.setRegion(idleDown);
+                this.health = 6;
+            } else {
+                deathTimer++;
+            }
+
+
+        }
+    }
+
+
 
 
 
@@ -349,6 +377,13 @@ public class Player extends Entity{
     }
 
     public void render(SpriteBatch batch) {
+
+        if (!isInvincible) {
+            sprite.setColor(1, 1, 1, 0.5f); // white tint, 50% opacity
+        } else {
+            sprite.setColor(1, 1, 1, 1f); // full opacity
+        }
+
         if (isAttacking) {
             updateWeaponSprite();
             weaponSprite.draw(batch);
