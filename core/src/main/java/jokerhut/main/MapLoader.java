@@ -45,4 +45,30 @@ public class MapLoader {
             }
         }
 
+    public boolean[][] generateWalkableGrid() {
+        float tileSize = 1f;
+        int mapWidth = screen.map.getProperties().get("width", Integer.class);
+        int mapHeight = screen.map.getProperties().get("height", Integer.class);
+
+        boolean[][] grid = new boolean[mapWidth][mapHeight];
+
+        for (int x = 0; x < mapWidth; x++) {
+            for (int y = 0; y < mapHeight; y++) {
+                Rectangle tileRect = new Rectangle(x * tileSize, y * tileSize, tileSize, tileSize);
+                boolean walkable = true;
+
+                for (Rectangle wall : screen.wallCollisionRects) {
+                    if (wall.overlaps(tileRect)) {
+                        walkable = false;
+                        break;
+                    }
+                }
+
+                grid[x][y] = walkable;
+            }
+        }
+
+        return grid;
+    }
+
 }

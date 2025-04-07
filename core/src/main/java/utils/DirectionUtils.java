@@ -36,4 +36,17 @@ public class DirectionUtils {
         return scaledVector;
     }
 
+    public static Vector2 subtractVectors (Vector2 vOne, Vector2 vTwo) {
+        return new Vector2(vOne.x - vTwo.x, vOne.y - vTwo.y);
+    }
+
+    public static float findDistance (Vector2 destination, Vector2 origin) {
+        Vector2 distance = subtractVectors(destination, origin);
+        return calculateMagnitude(distance.x, distance.y);
+
+    }
+
+
+
+
 }

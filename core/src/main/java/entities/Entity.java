@@ -16,7 +16,7 @@ public abstract class Entity {
     public Vector2 lastDirection;
     public Vector2 position;
     public Vector2 velocity;
-    public float speed;
+    public float speed = 0.5f;
     public Sprite sprite;
     public Rectangle collisionRect;
     public Rectangle futureCollisionRect;
@@ -32,7 +32,7 @@ public abstract class Entity {
     public Vector2 intendedDirection = new Vector2();
     public Vector2 knockback = new Vector2();
     public float knockbackTime = 0f;
-    MainScreen screen;
+    public MainScreen screen;
     public float invincibilityTimer = 0f;
     public boolean isInvincible = true;
     public AnimationHandler animationHandler;

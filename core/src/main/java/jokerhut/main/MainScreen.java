@@ -40,6 +40,9 @@ public class MainScreen implements Screen {
     public boolean isInDialogue = false;
     public boolean isViewingInventory;
 
+    public boolean[][] walkableGrid;
+
+
     public HUD hud;
     public Player player;
 
@@ -64,6 +67,7 @@ public class MainScreen implements Screen {
         player = new Player(5, 15, this);
         musicHandler.playVillageMusic();
         hud = new HUD(new ScreenViewport(), batch, this);
+        this.walkableGrid = mapLoader.generateWalkableGrid();
 
     }
 
@@ -220,4 +224,8 @@ public class MainScreen implements Screen {
 
 
     }
+
+
+
+
 }

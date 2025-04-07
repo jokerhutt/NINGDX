@@ -23,7 +23,6 @@ public class Enemy extends NPC {
         setupEnemyAnimation(idlePath);
         this.damage = 1;
         this.hitboxRectangle = new Rectangle();
-
         this.lastDirectionY = -1;
         setupSprite(idleDown);
 
@@ -52,7 +51,7 @@ public class Enemy extends NPC {
     }
 
     public void handleAttackCooldown () {
-        if (isAttacking && attackCooldown > 100f) {
+        if (isAttacking && attackCooldown > 2f) {
             isAttacking = false;
             attackCooldown = 0f;
         } else if (isAttacking) {
@@ -63,7 +62,7 @@ public class Enemy extends NPC {
     public void performAttack (Player targetPlayer) {
         if (!isAttacking && attackCooldown <= 0) {
             isAttacking = true;
-            targetPlayer.handleTakenDamage(this);
+            targetPlayer.takeDamage(1, this);
         }
 
     }

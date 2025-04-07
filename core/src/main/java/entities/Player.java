@@ -83,7 +83,7 @@ public class Player extends Entity{
         weaponSprite = new Sprite(stickInHandTexture);
         weaponSprite.setSize(9f / Constants.TILESIZE, 36 / Constants.TILESIZE);
         weaponSprite.setOriginCenter(); // Important: so it rotates around the middle
-
+        this.hitboxRectangle = new Rectangle();
         this.playerKeyHandler = new KeyHandler(this, screen);
         this.hitboxWidth = 0.8f;
         this.hitboxHeight = 0.5f;
@@ -142,6 +142,12 @@ public class Player extends Entity{
         //APPLYING MOVEMENT METHODS
         if (moving) {
             applySlidingMovement(velocity, delta);
+            this.hitboxRectangle.set(
+                sprite.getX(),
+                sprite.getY(),
+                sprite.getWidth(),
+                sprite.getHeight()
+            );
         }
 
         //ANIMATION METHODS
@@ -156,7 +162,9 @@ public class Player extends Entity{
     ///
     @Override
     public void setIntendedAndLastDirection () {
-        handleInput();
+        if (knockback.x == 0 && knockback.y == 0) {
+            handleInput();
+        }
     }
 
     @Override
@@ -337,6 +345,7 @@ public class Player extends Entity{
     public void update(float delta) {
 
         handleMovement(delta);
+        screen.physicsHandler.handleKnockback(delta, this);
     }
 
     public void render(SpriteBatch batch) {

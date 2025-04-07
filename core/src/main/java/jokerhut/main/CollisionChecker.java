@@ -43,7 +43,9 @@ public class CollisionChecker {
 
         for (int i = 0; i < entities.size; i++) {
             Entity entity = entities.get(i);
-            if (entity == callingEntity) continue; // optional, avoids self-check
+            if (entity == callingEntity) {
+                continue;
+            }
 
             if (entity.collisionRect.overlaps(callingEntity.collisionRect)) {
                 if (entity instanceof Enemy && callingEntity instanceof Player) {

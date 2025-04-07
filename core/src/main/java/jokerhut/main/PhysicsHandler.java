@@ -33,7 +33,6 @@ public class PhysicsHandler {
                 if (!screen.collisionChecker.isKnockbackCollidingOnAxis(dir, delta, entity)) {
                     entity.position.x += dir.x * delta;
                     entity.position.y += dir.y * delta;
-                    System.out.println("Sliding direction: " + dir);
                     moved = true;
                     break;
                 }

@@ -6,24 +6,24 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Array;
 import jokerhut.main.AnimationHandler;
 import jokerhut.main.DialogueHandler;
 import jokerhut.main.MainScreen;
 import objects.GameObject;
-import utils.AIUtils;
-
-import static utils.AIUtils.chooseRandomDirection;
+import aiBehavior.AIUtils;
+import utils.DirectionUtils;
+import utils.MovementUtils;
 
 public class NPC extends Entity {
 
-
+    public boolean chasing = false;
     public float lastDirectionX = 0f;
     public float lastDirectionY;
     public Texture portrait;
-    float actionTimer;
-    float actionDuration = 0f;
+    public float actionTimer;
+    public float actionDuration = 0f;
     public String name;
     public String type;
     public boolean isInPurchaseScreen;
@@ -32,6 +32,12 @@ public class NPC extends Entity {
     boolean movesOnItsOwn = false;
     String idlePath;
     String walkingPath;
+    Vector2 lastPlayerTile = new Vector2(-1, -1);
+    public int currentPathIndex = 0;
+    public Array<Vector2> path = new Array<>();
+    public float pathRefreshTimer;
+    public float pathRefreshCooldown;
+    public Entity lockedOnto = null;
 
     public TextureRegion idleDown, idleUp, idleLeft, idleRight;
     public Animation<TextureRegion> walkDown, walkUp, walkLeft, walkRight;
@@ -44,7 +50,6 @@ public class NPC extends Entity {
         this.animationHandler = new AnimationHandler();
         this.emoteHandler = new EmoteHandler(this);
         this.hitboxHeight = 0.5f;
-        this.speed = 0.5f;
         this.health = 6;
         this.emoteTimer = 0f;
     }
@@ -56,6 +61,7 @@ public class NPC extends Entity {
 
     public void update (float delta) {
         if (this.movesOnItsOwn) {
+            setIntendedAndLastDirection();
             setAction(delta);
         }
         handleActions(delta);
@@ -67,7 +73,6 @@ public class NPC extends Entity {
         sprite.draw(batch);
     }
 
-
     public void setIntendedAndLastDirection () {
         AIUtils.chooseRandomDirection(this);
     }
@@ -75,35 +80,40 @@ public class NPC extends Entity {
     public void setAction(float delta) {
         actionTimer += delta;
 
-        if (actionTimer >= actionDuration) {
-            actionTimer = 0;
-            moving = !moving;
+        if (this instanceof Enemy) {
+            AIUtils.determineNearestEnemy(this, screen.player);
+        }
+        //TODO
+        //Loop over all enemies or entities somehow, plus the player,
+        // and determine which are within 4 units, and then pick out the smallest one
 
-            if (moving) {
-                setIntendedAndLastDirection();
-                applyVelocityFromDirection();
-                System.out.println("moving?");
-                actionDuration = MathUtils.random(1f, 4f);
-            } else {
-                velocity.set(0, 0); // stop
-                actionDuration = MathUtils.random(1f, 2f);
+//        if (this instanceof Enemy) {
+//            chasing = distance < 4f;
+//            System.out.println(chasing);
+//        }
+
+        if (chasing) {
+            speed = 3f;
+            AIUtils.handleChasing(delta, this);
+        } else {
+            speed = 0.5f;
+            MovementUtils.applyStandardMovement(this);
+        }
+
+        if (moving || chasing) {
+            if (knockback.x == 0 && knockback.y == 0) {
+                applySlidingMovement(velocity, delta);
             }
         }
 
-        if (moving) {
-
-                applySlidingMovement(velocity, delta);
-
-                if (this instanceof Enemy) {
-                    ((Enemy) this).hitboxRectangle.set(
-                        sprite.getX(),
-                        sprite.getY(),
-                        sprite.getWidth(),
-                        sprite.getHeight()
-                    );
-                }
-
-            }
+        if (this instanceof Enemy) {
+            hitboxRectangle.set(
+                sprite.getX(),
+                sprite.getY(),
+                sprite.getWidth(),
+                sprite.getHeight()
+            );
+        }
 
         updateSpriteAnimation();
         sprite.setPosition(position.x, position.y);
