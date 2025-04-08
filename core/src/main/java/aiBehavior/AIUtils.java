@@ -41,7 +41,7 @@ public class AIUtils {
     }
 
 
-    public static void followPlayer(NPC npc, Entity entity, boolean[][] walkableGrid) {
+    public static void followEntity(NPC npc, Entity entity, boolean[][] walkableGrid) {
         float tileSize = 1f;
         Vector2 npcTile = worldToTile(npc.getPosition(), tileSize);
         Vector2 playerTile = worldToTile(entity.getPosition(), tileSize);
@@ -62,10 +62,10 @@ public class AIUtils {
             npc.intendedDirection.set(entity.getPosition().cpy().sub(npc.getPosition()).nor());
             npc.lastDirection.set(npc.intendedDirection);
         }
-        System.out.println("Chasing: " + npc.chasing);
-        System.out.println("NPC Pos: " + npc.getPosition() + " -> Player Pos: " + entity.getPosition());
-        System.out.println("NPC Tile: " + npcTile + " Player Tile: " + playerTile);
-        System.out.println("Path size: " + (path != null ? path.size() : "null"));
+//        System.out.println("Chasing: " + npc.chasing);
+//        System.out.println("NPC Pos: " + npc.getPosition() + " -> Player Pos: " + entity.getPosition());
+//        System.out.println("NPC Tile: " + npcTile + " Player Tile: " + playerTile);
+//        System.out.println("Path size: " + (path != null ? path.size() : "null"));
     }
 
     public static Vector2 worldToTile(Vector2 worldPos, float tileSize) {
@@ -80,7 +80,7 @@ public class AIUtils {
         npc.pathRefreshTimer += delta;
 
         if (npc.pathRefreshTimer >= npc.pathRefreshCooldown) {
-            followPlayer(npc, npc.lockedOnto, npc.screen.walkableGrid);
+            followEntity(npc, npc.lockedOnto, npc.screen.walkableGrid);
             npc.pathRefreshTimer = 0f;
         }
 
@@ -100,9 +100,7 @@ public class AIUtils {
         }
     }
 
-    public static void determineNearestEnemy (NPC npc, Player player) {
-
-
+    public static void determineNearestEntity (NPC npc, Player player) {
             float distanceFromPlayer = DirectionUtils.findDistance(player.position, npc.position);
             float nearestOtherDistance = 100f;
 
@@ -132,12 +130,43 @@ public class AIUtils {
                     npc.lockedOnto = player;
                 }
                 npc.chasing = true;
+
             } else {
                 npc.lockedOnto = null;
                 npc.chasing = false;
             }
+    }
 
+    public static void determineNearestEnemy (NPC npc) {
+        float nearestOtherDistance = 100f;
 
+        NPC currNpc;
+        for (int i = 0; i < npc.screen.enemyArray.size; i++) {
+            currNpc = (NPC)npc.screen.enemyArray.get(i);
+            float currentDistance;
+            if (currNpc != null) {
+                if (i == 0) {
+                    currentDistance = DirectionUtils.findDistance(currNpc.position, npc.position);
+                    nearestOtherDistance = currentDistance;
+                    npc.lockedOnto = currNpc;
+                } else {
+                    currentDistance = DirectionUtils.findDistance(currNpc.position, npc.position);
+                    if (currentDistance < nearestOtherDistance) {
+                        nearestOtherDistance = currentDistance;
+                        npc.lockedOnto = currNpc;
+                    }
+                }
+            }
+        }
+
+        if (nearestOtherDistance < 4f) {
+
+            npc.chasing = true;
+
+        } else {
+            npc.lockedOnto = null;
+            npc.chasing = false;
+        }
     }
 
 

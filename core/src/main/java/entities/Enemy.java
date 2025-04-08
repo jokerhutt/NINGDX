@@ -11,8 +11,7 @@ public class Enemy extends NPC {
 
     public int damage;
 
-    public boolean isAttacking;
-    public float attackCooldown;
+    public Animation<TextureRegion> enemyDeathAnimation;
 
     public Enemy (float x, float y, MainScreen screen) {
         super(x, y, screen);
@@ -22,8 +21,10 @@ public class Enemy extends NPC {
         this.portrait = new Texture("redSnakePortrait.png");
         setupEnemyAnimation(idlePath);
         this.damage = 1;
+        this.health = 6;
         this.hitboxRectangle = new Rectangle();
         this.lastDirectionY = -1;
+        this.meleeAttackBox = new Rectangle();
         setupSprite(idleDown);
 
         this.movesOnItsOwn = true;
@@ -39,28 +40,32 @@ public class Enemy extends NPC {
             sprite.getWidth(),
             sprite.getHeight()
         );
-
-
+        enemyDeathAnimation = animationHandler.setupDeathAnimation(this);
 
     }
+
+    public void handleDeath () {
+        isAlive = false;
+        turnOnDeathAnimation();
+    }
+
 
 
     public void handleActions (float delta) {
         handleAttackCooldown();
-        screen.physicsHandler.handleKnockback(delta, this);
+            screen.physicsHandler.handleKnockback(delta, this);
+            long currTime = System.currentTimeMillis();
+//        System.out.println(this.isInvincible + " at " + currTime);
     }
 
-    public void handleAttackCooldown () {
-        if (isAttacking && attackCooldown > 2f) {
-            isAttacking = false;
-            attackCooldown = 0f;
-        } else if (isAttacking) {
-            attackCooldown++;
-        }
+    public void turnOnDeathAnimation () {
+        sprite.setRegion(enemyDeathAnimation.getKeyFrame(animationTimer, true));
     }
+
+
 
     public void performAttack (Player targetPlayer) {
-        if (!isAttacking && attackCooldown <= 0) {
+        if (!isAttacking && attackingCooldown <= 0) {
             isAttacking = true;
             targetPlayer.takeDamage(1, this);
         }

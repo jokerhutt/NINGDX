@@ -13,6 +13,7 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
 import entities.Entity;
 import entities.NPC;
+import entities.NPC_Sensei;
 import fx.EffectAnimation;
 import jokerhut.main.MainScreen;
 
@@ -103,6 +104,23 @@ public class CollisionDebug {
         );
 
         shapeRenderer.end();
+    }
+
+    public void entityMeleeZoneDebug (Entity entity) {
+        if (entity instanceof NPC_Sensei) {
+            shapeRenderer.setProjectionMatrix(screen.mainCamera.camera.combined);
+            shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
+            shapeRenderer.setColor(Color.PINK);
+
+            shapeRenderer.rect(
+                entity.meleeAttackBox.x,
+                entity.meleeAttackBox.y,
+                entity.meleeAttackBox.width,
+                entity.meleeAttackBox.height
+            );
+
+            shapeRenderer.end();
+        }
     }
 
     public void drawTileGrid(int mapWidth, int mapHeight, float tileSize) {

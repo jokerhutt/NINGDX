@@ -28,22 +28,16 @@ public class Player extends Entity{
     public Animation<TextureRegion> walkDown, walkUp, walkLeft, walkRight;
     public AnimationHandler animationHandler;
     public boolean hasTriggeredFx = false;
-    public float animationTimer = 0f;
 
     Texture stickInHandTexture = new Texture("stickInHand.png");
     Texture lanceInHandTexture = new Texture("lanceInHand.png");
     Texture swordInHandTexture = new Texture("swordInHand.png");
 
     Texture deadTexture = new Texture("Dead.png");
-    public SFXHandler sfxHandler;
 
     TextureRegion stickInHandRegion;
     TextureRegion lanceInHandRegion;
     TextureRegion swordInHandRegion;
-    public boolean isAttacking;
-    public float attackingTimer;
-    public float attackingCooldown;
-    public boolean isInAttackCoolDown = false;
 
     private final Map<String, Vector2> weaponAnchors = Map.of(
         "right", new Vector2(1.35f, 0.25f),
@@ -60,7 +54,6 @@ public class Player extends Entity{
     public Inventory inventory;
 
     public Rectangle dialogueBox;
-    public Rectangle meleeAttackBox;
 
     public KeyHandler playerKeyHandler;
 
@@ -77,8 +70,7 @@ public class Player extends Entity{
         stickInHandRegion = new TextureRegion(stickInHandTexture);
         lanceInHandRegion = new TextureRegion(lanceInHandTexture);
         swordInHandRegion = new TextureRegion(swordInHandTexture);
-        sfxHandler = new SFXHandler();
-        this.health = 6;
+
         this.attackingTimer = 0f;
         this.attackingCooldown = 0f;
         this.isAttacking = false;
@@ -94,16 +86,11 @@ public class Player extends Entity{
         this.hitboxHeight = 0.5f;
         this.speed = 6f;
         this.coins = 10;
+        this.maxHealth = 6;
+        health = maxHealth;
         this.inventory = new Inventory(this);
 
 
-    }
-
-    public float getCenterX() {
-        return this.position.x + this.sprite.getWidth() / 2f;
-    }
-    public float getCenterY () {
-        return this.position.y + this.sprite.getHeight() / 2f;
     }
 
     public void setMoving (boolean moving) {
@@ -129,11 +116,17 @@ public class Player extends Entity{
     public void handleMovement (float delta) {
 
         animationTimer += delta;
-        velocity.set(0, 0);
+        velocity.setZero();
         moving = false;
-        intendedDirection.set(0, 0);
+        intendedDirection.setZero();
 
         if (isAlive) {
+
+            hitboxRectangle.set(sprite.getX(), sprite.getY(), sprite.getWidth(), sprite.getHeight());
+            sprite.setPosition(position.x, position.y);
+
+            handleInvincibility();
+
             //DIRECTION BASED METHODS
             setIntendedAndLastDirection();
             applyVelocityFromDirection();
@@ -141,7 +134,7 @@ public class Player extends Entity{
 
             //COLLISION BOX & SPRITE POSITION UPDATE METHODS
             updateCollisionBoxes();
-
+            playerKeyHandler.printX();
             //ACTION BASED METHODS
             playerKeyHandler.handleAttacking();
 
@@ -165,6 +158,8 @@ public class Player extends Entity{
         }
 
     }
+
+
 
     /// START
     ///
@@ -267,25 +262,6 @@ public class Player extends Entity{
         );
     }
 
-    public void updateMeleeAttackZone () {
-        float offset = 0.8f;
-        float boxSize = 0.8f;
-
-        float dx = 0;
-        float dy = 0;
-
-        if (lastDirection.x > 0) dx = offset;
-        if (lastDirection.x < 0) dx = -offset;
-        if (lastDirection.y > 0) dy = offset;
-        if (lastDirection.y < 0) dy = -offset;
-
-        meleeAttackBox.set(
-            getCenterX() + dx - boxSize / 1.8f,
-            (getCenterY() + dy - boxSize / 1.8f),
-            boxSize,
-            boxSize
-        );
-    }
 
     public void updateWeaponSprite() {
         if (inventory.currentItem == null) return;
@@ -348,20 +324,22 @@ public class Player extends Entity{
     }
 
     public void handleDeadState() {
-        if (!isAlive) {
-
-            if (deathTimer >= 300) {
-                isAlive = true;
-                this.position.set(5, 15);
-                this.sprite.setPosition(5, 15);
-                this.sprite.setRegion(idleDown);
-                this.health = 6;
-            } else {
-                deathTimer++;
-            }
-
-
-        }
+        screen.cutsceneManager.play("first_old_man");
+//        if (!isAlive) {
+//
+//            if (deathTimer >= 300) {
+//                isAlive = true;
+//                this.position.set(5, 15);
+//                this.sprite.setPosition(5, 15);
+//                this.sprite.setRegion(idleDown);
+//                this.health = maxHealth;
+//                screen.hud.updateHealth(this.health, this.maxHealth);
+//            } else {
+//                deathTimer++;
+//            }
+//
+//
+//        }
     }
 
 
@@ -378,7 +356,7 @@ public class Player extends Entity{
 
     public void render(SpriteBatch batch) {
 
-        if (!isInvincible) {
+        if (isInvincible) {
             sprite.setColor(1, 1, 1, 0.5f); // white tint, 50% opacity
         } else {
             sprite.setColor(1, 1, 1, 1f); // full opacity

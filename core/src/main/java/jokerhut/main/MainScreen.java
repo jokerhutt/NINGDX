@@ -14,10 +14,14 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import cutscenes.CutsceneManager;
 import debug.CollisionDebug;
 import entities.*;
 import hud.HUD;
 import sound.MusicHandler;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /** First screen of the application. Displayed after the application is created. */
 public class MainScreen implements Screen {
@@ -26,21 +30,42 @@ public class MainScreen implements Screen {
     public TiledMap map;
     private OrthogonalTiledMapRenderer renderer;
     public Array<Rectangle> wallCollisionRects;
+    public Array<Rectangle> enemyBoundaryRects;
     MapLoader mapLoader;
     SpriteBatch batch;
     public MainCamera mainCamera;
     FitViewport viewport;
     public CollisionChecker collisionChecker;
-    CollisionDebug collisionDebugger;
+    public CollisionDebug collisionDebugger;
     MusicHandler musicHandler;
     public Array<Entity> npcArray;
     public Array<Enemy> enemyArray;
     public PhysicsHandler physicsHandler;
     public NPC currentNPC;
+    public CutsceneManager cutsceneManager;
     public boolean isInDialogue = false;
     public boolean isViewingInventory;
+    public boolean paused = false;
 
     public boolean[][] walkableGrid;
+
+    private final Map<String, NPC> tempNpcMap = new HashMap<>();
+
+    public void setTempNPC(String key, NPC npc) {
+        tempNpcMap.put(key, npc);
+    }
+
+    public SpriteBatch getBatch () {
+        return  this.batch;
+    }
+
+    public NPC getTempNPC(String key) {
+        return tempNpcMap.get(key);
+    }
+
+    public void clearTempNPCs() {
+        tempNpcMap.clear();
+    }
 
 
     public HUD hud;
@@ -59,6 +84,8 @@ public class MainScreen implements Screen {
         collisionDebugger = new CollisionDebug(this);
         wallCollisionRects = new Array<>();
         wallCollisionRects = mapLoader.createStaticCollisionRects("Collision");
+        enemyBoundaryRects = new Array<>();
+        enemyBoundaryRects = mapLoader.createStaticCollisionRects("EnemyBoundary");
         this.collisionChecker = new CollisionChecker();
         this.npcArray = setupNpcs();
         this.enemyArray = setupEnemies();
@@ -68,7 +95,7 @@ public class MainScreen implements Screen {
         musicHandler.playVillageMusic();
         hud = new HUD(new ScreenViewport(), batch, this);
         this.walkableGrid = mapLoader.generateWalkableGrid();
-
+        this.cutsceneManager = new CutsceneManager(this);
     }
 
     @Override
@@ -76,15 +103,17 @@ public class MainScreen implements Screen {
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         mainCamera.updateCamera(delta);
-        if (!isInDialogue) {
+        if (!isInDialogue && !paused) {
             player.update(delta);
             updateEntityArrays(delta);
-            updateEnemyArrays(delta);
             player.playerKeyHandler.toggleInventory();
-        } else {
+        } else if (isInDialogue){
             isViewingInventory = false;
             player.playerKeyHandler.checkUpdateDialogue();
+        } else {
+            cutsceneManager.update(delta);
         }
+        updateEnemyArrays(delta);
         player.animationHandler.playFxAnimation(delta, player);
         renderer.setView(mainCamera.camera);
         batch.setProjectionMatrix(mainCamera.camera.combined); // sync batch with camera
@@ -100,7 +129,7 @@ public class MainScreen implements Screen {
         runScreenDebugMethods();
         hud.render(delta);
         batch.begin();
-        if (this.currentNPC != null && this.currentNPC.dialogueHandler != null) {
+        if (this.currentNPC != null && this.currentNPC.dialogueHandler != null && player.isInDialogue) {
             hud.drawDialogue(currentNPC.dialogueHandler.getCurrentLine(), batch);
         }
         batch.end();
@@ -124,10 +153,13 @@ public class MainScreen implements Screen {
     public Array<Enemy> setupEnemies () {
         enemyArray = new Array<>();
         enemyArray.add(new Enemy(3, 7, this));
-        enemyArray.add(new Enemy(3, 5, this));
 
 
         return enemyArray;
+    }
+
+    public void setPaused (boolean paused) {
+        this.paused = paused;
     }
 
     public void updateEntityArrays (float delta) {
@@ -220,6 +252,10 @@ public class MainScreen implements Screen {
             collisionDebugger.drawTileGrid(mapWidth, mapHeight, 1f);
         }
         collisionDebugger.playerMeleeZoneDebug();
+
+        for (Entity npc : npcArray) {
+            collisionDebugger.entityMeleeZoneDebug(npc);
+        }
 
 
 

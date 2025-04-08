@@ -5,6 +5,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import entities.Enemy;
 import entities.Entity;
+import entities.NPC_Sensei;
 import entities.Player;
 
 public class CollisionChecker {
@@ -17,6 +18,7 @@ public class CollisionChecker {
                 if (callingEntity instanceof Player) {
                     System.out.println("COOLISION");
                 }
+
                 doesCollide = true;
                 break;
             }
@@ -51,6 +53,9 @@ public class CollisionChecker {
                 if (entity instanceof Enemy && callingEntity instanceof Player) {
                     ((Enemy) entity).performAttack((Player) callingEntity);
                 }
+//                if (callingEntity instanceof Enemy && entity instanceof NPC_Sensei) {
+//                    ((NPC_Sensei) entity).performAttack((Enemy) callingEntity);
+//                }
                 doesCollide = true;
                 break;
             }
@@ -100,12 +105,17 @@ public class CollisionChecker {
         }
     }
 
-    public void checkAttackCollision (Array<Enemy> targetEnemyArray, Player callingPlayer) {
+    public void checkAttackCollision (Array<? extends Entity> targetEnemyArray, Entity callingEntity) {
+        System.out.println("Checking collision");
+        for (Entity targetEnemy : targetEnemyArray) {
 
-        for (Enemy enemy : targetEnemyArray) {
-
-            if (callingPlayer.meleeAttackBox.overlaps(enemy.collisionRect) && callingPlayer.isAttacking) {
-                enemy.takeDamage(1, callingPlayer);
+            if (callingEntity.meleeAttackBox.overlaps(targetEnemy.hitboxRectangle) && callingEntity.isAttacking) {
+                if (callingEntity instanceof Player) {
+                    targetEnemy.takeDamage(1, callingEntity);
+                } else if (callingEntity instanceof NPC_Sensei && targetEnemy instanceof Enemy) {
+                    System.out.println("collidieng");
+                    ((NPC_Sensei) callingEntity).performAttack((Enemy) targetEnemy);
+                }
             }
 
         }

@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import debug.CollisionDebug;
+import entities.Enemy;
 import entities.Entity;
 import entities.NPC;
 import entities.Player;
@@ -104,6 +105,21 @@ public class AnimationHandler {
         player.attackDown  = splitAttackingSheet[0][0];
         player.attackLeft  = splitAttackingSheet[0][2];
         player.attackRight = splitAttackingSheet[0][3];
+
+    }
+
+    public Animation<TextureRegion> setupDeathAnimation (Enemy enemy) {
+
+        Texture sheet = new Texture("smokeSpriteSheet.png");
+        TextureRegion[][] split = TextureRegion.split(sheet, 32, 32);
+
+        Animation<TextureRegion> deathAnim = new Animation<>(0.5f, split[0][0], split[0][1], split[0][2], split[0][3], split[0][4], split[0][5]);
+        return  deathAnim;
+    }
+
+    public void handleDeathAnimationEnemy (Enemy enemy) {
+
+
 
     }
 

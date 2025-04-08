@@ -31,11 +31,12 @@ public class HUD {
     MainScreen screen;
     private BitmapFont font = new BitmapFont();
     Texture dialogueBoxTexture = new Texture("DialogBoxFaceset.png");
-
+    ProgressBarStack healthBar;
     PurchaseItemsActor purchaseItemsActor;
     CoinActor coinDisplay;
     InventoryActor inventoryActor;
     Table coinTable;
+
     public int coinCount;
 
     public HUD(Viewport viewport, SpriteBatch batch, MainScreen screen) {
@@ -43,13 +44,14 @@ public class HUD {
         stage = new Stage(new ScreenViewport(), batch);
         this.screen = screen;
         Gdx.input.setInputProcessor(stage);
-
+        createHealthBar();
         //Initialise Coins
         coinDisplay = new CoinActor(screen, 'M');
         coinTable = new Table();
         coinTable.top().right().pad(10).padRight(30);
         coinTable.setFillParent(true);
-        coinTable.add(coinDisplay).right().padTop(10).padRight(10);
+        coinTable.add(healthBar).padRight(20).padTop(10).size(22 * 1.5f, 40 * 1.5f);
+        coinTable.add(coinDisplay).padTop(10); // no need to right-align here
         stage.addActor(coinTable);
 
         inventoryActor = new InventoryActor(screen);
@@ -61,6 +63,12 @@ public class HUD {
         stage.addActor(purchaseItemsActor);
 
 
+//        Table healthTable = new Table();
+//        healthTable.bottom().left().pad(30);
+//        healthTable.setFillParent(true);
+//        healthTable.add(healthBar).size(22 * 2, 40 * 2);
+//
+//        stage.addActor(healthTable);
 
     }
 
@@ -130,31 +138,17 @@ public class HUD {
 
     }
 
-//    public void refreshInventory () {
-//        inventoryTable.clear();
-//        for (int row = 0; row < 2; row++) {
-//            for (int col = 0; col < 4; col++) {
-//                int index = row * 4 + col;
-//
-//                GameObject currItem = screen.player.inventory[index];
-//
-//                Stack slot = new Stack();
-//
-//                if (screen.player.getSelectedItemIndex() == index) {
-//                    slot.add(new Image(selectedSlotDrawable));
-//                } else {
-//                    slot.add(new Image(slotDrawable));
-//                }
-//
-//                if (currItem != null && currItem.sprite != null) {
-//                    TextureRegionDrawable itemDrawable = new TextureRegionDrawable(new TextureRegionDrawable(currItem.sprite));
-//                    slot.add(new Image(itemDrawable));
-//                }
-//
-//                inventoryTable.add(slot).size(64, 64).pad(4);
-//
-//            }
-//            inventoryTable.row();
-//        }
-//    }
+    public void createHealthBar () {
+        Texture bg = new Texture("BackgroundWood.png");
+        Texture white = new Texture("ProgressWhite.png");
+        Texture fill = new Texture("ProgressHealth.png");
+
+        healthBar = new ProgressBarStack(bg, white, fill);
+    }
+
+    public void updateHealth(float current, float max) {
+        float percent = current / max;
+        healthBar.setHealthPercent(percent);
+    }
+
 }

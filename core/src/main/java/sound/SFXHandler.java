@@ -6,9 +6,11 @@ import com.badlogic.gdx.audio.Sound;
 public class SFXHandler {
 
     Sound swingSound;
+    Sound hitSound;
 
     public SFXHandler () {
         swingSound = Gdx.audio.newSound(Gdx.files.internal("swingweapon.wav"));
+        hitSound = Gdx.audio.newSound(Gdx.files.internal("impact4.wav"));
     }
 
     public void playSound (String type) {
@@ -17,6 +19,9 @@ public class SFXHandler {
 
             case "swingweapon" :
                 swingSound.play();
+                break;
+            case "impact" :
+                hitSound.play();
                 break;
 
         }

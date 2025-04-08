@@ -9,6 +9,7 @@ import com.badlogic.gdx.math.Vector2;
 import jokerhut.main.AnimationHandler;
 import jokerhut.main.Main;
 import jokerhut.main.MainScreen;
+import sound.SFXHandler;
 import utils.MovementUtils;
 
 public abstract class Entity {
@@ -19,8 +20,13 @@ public abstract class Entity {
     public float speed = 0.5f;
     public Sprite sprite;
     public Rectangle collisionRect;
+    public boolean isAttacking;
+    public float attackingTimer;
+    public float attackingCooldown;
+    public boolean isInAttackCoolDown = false;
     public Rectangle futureCollisionRect;
     public float hitboxHeight;
+    public SFXHandler sfxHandler;
     public float hitboxWidth;
     public int health;
     public boolean isInteracting;
@@ -34,16 +40,39 @@ public abstract class Entity {
     public float knockbackTime = 0f;
     public MainScreen screen;
     public float invincibilityTimer = 0f;
-    public boolean isInvincible = true;
+    public boolean isInvincible = false;
     public AnimationHandler animationHandler;
     public boolean isEmoting;
     public float emoteTimer;
     public Rectangle hitboxRectangle;
+    public Rectangle meleeAttackBox;
     public boolean isAlive = true;
     public float deathTimer = 0f;
+    public float animationTimer = 0f;
+    int maxHealth;
 
     public Rectangle getCollisionRect() {
         return this.collisionRect;
+    }
+
+    public void updateMeleeAttackZone () {
+        float offset = 0.8f;
+        float boxSize = 0.8f;
+
+        float dx = 0;
+        float dy = 0;
+
+        if (lastDirection.x > 0) dx = offset;
+        if (lastDirection.x < 0) dx = -offset;
+        if (lastDirection.y > 0) dy = offset;
+        if (lastDirection.y < 0) dy = -offset;
+
+        meleeAttackBox.set(
+            getCenterX() + dx - boxSize / 1.8f,
+            (getCenterY() + dy - boxSize / 1.8f),
+            boxSize,
+            boxSize
+        );
     }
 
     public Vector2[] getKnockbackDirections() {
@@ -57,6 +86,13 @@ public abstract class Entity {
         };
     }
 
+    public float getCenterX() {
+        return this.position.x + this.sprite.getWidth() / 2f;
+    }
+    public float getCenterY () {
+        return this.position.y + this.sprite.getHeight() / 2f;
+    }
+
 
     public Entity (float x, float y, MainScreen screen) {
         this.lastDirection = new Vector2(-1, 0);
@@ -65,6 +101,7 @@ public abstract class Entity {
         this.collisionRect = new Rectangle();
         this.futureCollisionRect = new Rectangle();
         this.screen = screen;
+        sfxHandler = new SFXHandler();
         this.speechBubble = new Texture("emote20.png");
         this.happyEmote = new Texture("emote27.png");
     }
@@ -114,26 +151,40 @@ public abstract class Entity {
 
     public void takeDamage (float damage, Entity entity) {
 
+        if (this instanceof Enemy) {
+//            System.out.println(this.health);
+        }
+
         if (!this.isInvincible && invincibilityTimer == 0) {
+            sfxHandler.playSound("impact");
             this.isInvincible = true;
             this.health -= damage;
+            if (this instanceof Player) {
+                screen.hud.updateHealth(this.health, this.maxHealth);
+            }
             screen.physicsHandler.applyKnockback(entity.getPosition(), 4f, 0.2f, this);
             if (this.health <= 0) {
                 handleDeath();
                 return;
             }
             System.out.println("attacked! Health is now " + health);
-        } else if (this.isInvincible && invincibilityTimer >= 5f) {
-            this.isInvincible = false;
-            this.invincibilityTimer = 0;
-        } else if (this.isInvincible) {
-            invincibilityTimer ++;
         }
 
     }
 
-    public void handleDeath () {
+    public void handleInvincibility () {
+        if (this.isInvincible && invincibilityTimer >= 8f) {
+            this.isInvincible = false;
+            this.invincibilityTimer = 0;
+        } else if (this.isInvincible) {
+            invincibilityTimer ++;
+        } else {
+            invincibilityTimer = 0;
+        }
+    }
 
+    public void handleDeath () {
+        isAlive = false;
     }
 
 

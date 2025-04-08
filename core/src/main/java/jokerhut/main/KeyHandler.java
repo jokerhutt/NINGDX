@@ -99,6 +99,8 @@ public class KeyHandler {
 
     }
 
+
+
     public void enterDialogue () {
         if (Gdx.input.isKeyJustPressed(Input.Keys.E)) {
             if (!screen.isInDialogue) {
@@ -122,6 +124,12 @@ public class KeyHandler {
     public void toggleInventory () {
         if (Gdx.input.isKeyJustPressed(Input.Keys.I)) {
             screen.isViewingInventory = !screen.isViewingInventory;
+        }
+    }
+
+    public void printX () {
+        if (Gdx.input.isKeyJustPressed(Input.Keys.F)) {
+            System.out.println("PLAYER X IS: " + player.getCenterX() + " Y IS: " + player.getCenterY());
         }
     }
 

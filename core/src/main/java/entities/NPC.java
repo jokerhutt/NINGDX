@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import jokerhut.main.AnimationHandler;
@@ -49,6 +50,7 @@ public class NPC extends Entity {
         this.hitboxWidth = 0.8f;
         this.animationHandler = new AnimationHandler();
         this.emoteHandler = new EmoteHandler(this);
+        this.meleeAttackBox = new Rectangle();
         this.hitboxHeight = 0.5f;
         this.health = 6;
         this.emoteTimer = 0f;
@@ -60,77 +62,111 @@ public class NPC extends Entity {
     }
 
     public void update (float delta) {
-        if (this.movesOnItsOwn) {
-            setIntendedAndLastDirection();
-            setAction(delta);
+
+        if (isAlive) {
+            handleInvincibility();
+            if (this instanceof Enemy) {
+                hitboxRectangle.set(sprite.getX(), sprite.getY(), sprite.getWidth(), sprite.getHeight());
+                sprite.setPosition(position.x, position.y);
+            }
+
+            if (this.movesOnItsOwn) {
+                setIntendedAndLastDirection();
+                setAction(delta);
+            }
+            handleActions(delta);
+        } else {
+            handleDeathTimer(delta);
         }
-        handleActions(delta);
     }
 
 
     public void render (SpriteBatch batch) {
         emoteHandler.drawSpeechBubble(batch);
 
-        if (!isInvincible) {
+        if (isInvincible) {
             sprite.setColor(1, 1, 1, 0.5f); // white tint, 50% opacity
         } else {
             sprite.setColor(1, 1, 1, 1f); // full opacity
         }
 
         sprite.draw(batch);
+
     }
 
     public void setIntendedAndLastDirection () {
         AIUtils.chooseRandomDirection(this);
     }
 
-    public void setAction(float delta) {
-        actionTimer += delta;
-
-        if (this instanceof Enemy) {
-            AIUtils.determineNearestEnemy(this, screen.player);
-        }
-        //TODO
-        //Loop over all enemies or entities somehow, plus the player,
-        // and determine which are within 4 units, and then pick out the smallest one
-
-//        if (this instanceof Enemy) {
-//            chasing = distance < 4f;
-//            System.out.println(chasing);
-//        }
-
-        if (chasing) {
-            speed = 3f;
-            AIUtils.handleChasing(delta, this);
-        } else {
-            speed = 0.5f;
-            MovementUtils.applyStandardMovement(this);
-        }
-
-        if (moving || chasing) {
-            if (knockback.x == 0 && knockback.y == 0) {
-                applySlidingMovement(velocity, delta);
+    public void handleDeathTimer (float delta) {
+        animationTimer+= delta;
+        if (!this.isAlive) {
+            if (deathTimer >= 8f) {
+                screen.enemyArray.removeValue((Enemy) this, true);
+            } else {
+                deathTimer++;
             }
         }
+    }
 
-        if (this instanceof Enemy) {
-            hitboxRectangle.set(
-                sprite.getX(),
-                sprite.getY(),
-                sprite.getWidth(),
-                sprite.getHeight()
-            );
+    public void handleAttackCooldown () {
+        if (isAttacking && attackingCooldown > 0.5f) {
+            isAttacking = false;
+            attackingCooldown = 0f;
+        } else if (isAttacking) {
+            attackingCooldown++;
         }
+    }
 
-        updateSpriteAnimation();
-        sprite.setPosition(position.x, position.y);
-        this.collisionRect.set(
-            this.position.x + (sprite.getWidth() - hitboxWidth) / 2f,
-            this.position.y,
-            hitboxWidth,
-            hitboxHeight
-        );
+    public void setAction(float delta) {
 
+        animationTimer+= delta;
+            actionTimer += delta;
+
+            if (this instanceof Enemy) {
+                AIUtils.determineNearestEntity(this, screen.player);
+            } else if (this instanceof NPC_Sensei) {
+                AIUtils.determineNearestEnemy(this);
+            }
+
+            if (chasing) {
+                speed = 3f;
+                AIUtils.handleChasing(delta, this);
+            } else {
+                speed = 0.5f;
+                MovementUtils.applyStandardMovement(this);
+            }
+
+            if (this instanceof NPC_Sensei) {
+                System.out.println("Updating attack zone");
+                updateMeleeAttackZone();
+                screen.collisionChecker.checkAttackCollision(screen.enemyArray, this);
+            }
+
+
+            if (moving || chasing) {
+                if (knockback.x == 0 && knockback.y == 0) {
+                    applySlidingMovement(velocity, delta);
+                }
+            }
+
+            if (this instanceof Enemy) {
+                hitboxRectangle.set(
+                    sprite.getX(),
+                    sprite.getY(),
+                    sprite.getWidth(),
+                    sprite.getHeight()
+                );
+            }
+
+            updateSpriteAnimation();
+            sprite.setPosition(position.x, position.y);
+            this.collisionRect.set(
+                this.position.x + (sprite.getWidth() - hitboxWidth) / 2f,
+                this.position.y,
+                hitboxWidth,
+                hitboxHeight
+            );
 
     }
 
@@ -173,13 +209,35 @@ public class NPC extends Entity {
     public boolean checkAllCollisions () {
         if (screen.collisionChecker.checkStaticObjectCollision(screen.wallCollisionRects, this) ||
             screen.collisionChecker.checkEntityCollision(screen.npcArray, this) ||
-            screen.collisionChecker.checkEntityCollisionWithPlayer(this, screen.player)
+            screen.collisionChecker.checkEntityCollision(screen.enemyArray, this) ||
+            screen.collisionChecker.checkEntityCollisionWithPlayer(this, screen.player) ||
+            checkEnemyBounds()
         ) {
+
             return true;
+
         } else {
             return false;
         }
     }
+
+    public boolean checkEnemyBounds () {
+
+        if (this instanceof Enemy) {
+
+            if (screen.collisionChecker.checkStaticObjectCollision(screen.enemyBoundaryRects, this)) {
+                return true;
+            } else {
+                return  false;
+            }
+
+        } else {
+            return false;
+        }
+
+    }
+
+
     public void setupAnimation (String idlePath, String walkPath) {
         animationHandler.setupNPCAnimation(this, idlePath, walkPath);
     }

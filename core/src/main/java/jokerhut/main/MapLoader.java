@@ -64,6 +64,8 @@ public class MapLoader {
                     }
                 }
 
+
+
                 grid[x][y] = walkable;
             }
         }
