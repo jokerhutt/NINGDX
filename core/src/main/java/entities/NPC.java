@@ -5,16 +5,16 @@ import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import jokerhut.main.AnimationHandler;
 import jokerhut.main.DialogueHandler;
 import jokerhut.main.MainScreen;
+import movement.MovementStrategies;
+import movement.MovementStrategy;
 import objects.GameObject;
 import aiBehavior.AIUtils;
-import utils.DirectionUtils;
 import utils.MovementUtils;
 
 public class NPC extends Entity {
@@ -39,6 +39,7 @@ public class NPC extends Entity {
     public float pathRefreshCooldown;
     public Entity lockedOnto = null;
 
+    private MovementStrategy movementStrategy = MovementStrategies.NONE;
 
 
     public TextureRegion idleDown, idleUp, idleLeft, idleRight;
@@ -55,6 +56,11 @@ public class NPC extends Entity {
         this.hitboxHeight = 0.5f;
         this.health = 6;
         this.emoteTimer = 0f;
+    }
+
+    //MOVEMENT STRATEGY SETTER
+    public void setMovementStrategy(MovementStrategy strategy) {
+        this.movementStrategy = strategy;
     }
 
 
