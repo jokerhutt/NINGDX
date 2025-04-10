@@ -29,6 +29,7 @@ public abstract class Entity {
     public SFXHandler sfxHandler;
     public float hitboxWidth;
     public int health;
+    public float actionTimer;
     public boolean isInteracting;
     public boolean isInDialogue;
     public Texture speechBubble;
@@ -147,6 +148,10 @@ public abstract class Entity {
             hitboxWidth,
             hitboxHeight
         );
+    }
+
+    public void updateSpriteAnimation () {
+
     }
 
     public void takeDamage (float damage, Entity entity) {

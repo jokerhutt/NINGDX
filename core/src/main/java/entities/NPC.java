@@ -23,7 +23,6 @@ public class NPC extends Entity {
     public float lastDirectionX = 0f;
     public float lastDirectionY;
     public Texture portrait;
-    public float actionTimer;
     public float actionDuration = 0f;
     public String name;
     public String type;
@@ -39,6 +38,8 @@ public class NPC extends Entity {
     public float pathRefreshTimer;
     public float pathRefreshCooldown;
     public Entity lockedOnto = null;
+
+
 
     public TextureRegion idleDown, idleUp, idleLeft, idleRight;
     public Animation<TextureRegion> walkDown, walkUp, walkLeft, walkRight;

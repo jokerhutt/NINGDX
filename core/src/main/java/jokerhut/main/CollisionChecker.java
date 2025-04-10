@@ -106,11 +106,10 @@ public class CollisionChecker {
     }
 
     public void checkAttackCollision (Array<? extends Entity> targetEnemyArray, Entity callingEntity) {
-        System.out.println("Checking collision");
         for (Entity targetEnemy : targetEnemyArray) {
 
-            if (callingEntity.meleeAttackBox.overlaps(targetEnemy.hitboxRectangle) && callingEntity.isAttacking) {
-                if (callingEntity instanceof Player) {
+            if (callingEntity.meleeAttackBox.overlaps(targetEnemy.hitboxRectangle)) {
+                if (callingEntity instanceof Player && callingEntity.isAttacking) {
                     targetEnemy.takeDamage(1, callingEntity);
                 } else if (callingEntity instanceof NPC_Sensei && targetEnemy instanceof Enemy) {
                     System.out.println("collidieng");

@@ -20,8 +20,8 @@ public class Enemy extends NPC {
         this.idlePath = "redSnakeSheet.png";
         this.portrait = new Texture("redSnakePortrait.png");
         setupEnemyAnimation(idlePath);
-        this.damage = 1;
-        this.health = 6;
+        this.damage = 3;
+        this.health = 10;
         this.hitboxRectangle = new Rectangle();
         this.lastDirectionY = -1;
         this.meleeAttackBox = new Rectangle();
@@ -67,7 +67,7 @@ public class Enemy extends NPC {
     public void performAttack (Player targetPlayer) {
         if (!isAttacking && attackingCooldown <= 0) {
             isAttacking = true;
-            targetPlayer.takeDamage(1, this);
+            targetPlayer.takeDamage(this.damage, this);
         }
 
     }

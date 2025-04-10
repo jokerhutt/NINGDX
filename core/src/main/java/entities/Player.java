@@ -324,7 +324,9 @@ public class Player extends Entity{
     }
 
     public void handleDeadState() {
-        screen.cutsceneManager.play("first_old_man");
+        if (!screen.cutsceneManager.cutsceneMap.get("first_old_man").used) {
+            screen.cutsceneManager.play("first_old_man");
+        }
 //        if (!isAlive) {
 //
 //            if (deathTimer >= 300) {

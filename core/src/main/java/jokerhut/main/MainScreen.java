@@ -129,7 +129,7 @@ public class MainScreen implements Screen {
         runScreenDebugMethods();
         hud.render(delta);
         batch.begin();
-        if (this.currentNPC != null && this.currentNPC.dialogueHandler != null && player.isInDialogue) {
+        if (this.currentNPC != null && this.currentNPC.dialogueHandler != null && isInDialogue) {
             hud.drawDialogue(currentNPC.dialogueHandler.getCurrentLine(), batch);
         }
         batch.end();
@@ -153,6 +153,9 @@ public class MainScreen implements Screen {
     public Array<Enemy> setupEnemies () {
         enemyArray = new Array<>();
         enemyArray.add(new Enemy(3, 7, this));
+        enemyArray.add(new Enemy(5, 7, this));
+        enemyArray.add(new Enemy(3, 6, this));
+        enemyArray.add(new Enemy(5, 6, this));
 
 
         return enemyArray;

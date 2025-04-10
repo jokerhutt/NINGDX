@@ -3,6 +3,8 @@ package cutscenes;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Queue;
+
+import entities.NPC_Sensei;
 import jokerhut.main.MainScreen;
 
 import java.util.LinkedList;
@@ -16,7 +18,7 @@ public class CutsceneManager {
     private final Queue<CutsceneAction> actions = new LinkedList<>();
     private CutsceneAction currentAction = null;
 
-    private final Map<String, Cutscene> cutsceneMap = new HashMap<>();
+    public final Map<String, Cutscene> cutsceneMap = new HashMap<>();
 
     public CutsceneManager(MainScreen screen) {
         this.screen = screen;
@@ -24,6 +26,8 @@ public class CutsceneManager {
         // Register your cutscenes
 //        cutsceneMap.put("player_death", new PlayerDeathCutscene(this));
     }
+
+
 
     public void play(String id) {
         Cutscene cutscene = cutsceneMap.get(id);

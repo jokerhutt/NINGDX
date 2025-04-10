@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import entities.Entity;
 import entities.NPC;
+import entities.NPC_Sensei;
 import entities.Player;
 import utils.DirectionUtils;
 
@@ -120,6 +121,8 @@ public class KeyHandler {
             }
         }
     }
+
+
 
     public void toggleInventory () {
         if (Gdx.input.isKeyJustPressed(Input.Keys.I)) {

@@ -6,8 +6,11 @@ import jokerhut.main.MainScreen;
 
 public class FirstOldManCutscene extends Cutscene {
 
+
+
     public FirstOldManCutscene(CutsceneManager manager) {
         super(manager);
+
     }
 
     @Override
@@ -44,10 +47,44 @@ public class FirstOldManCutscene extends Cutscene {
             }
         });
 
+        manager.addAction(() -> {
+            enterCutsceneDialogue();
+        });
+
+        // Move both Sensei and Player to (8, 5)
+        manager.addAction(() -> {
+            NPC_Sensei sensei = (NPC_Sensei) screen.getTempNPC("oldMan");
+            return new MoveNPCAction(sensei, 10, 5, 1.5f);
+        });
+
+        manager.addAction(() -> {
+            return new MoveNPCAction(screen.player, 9, 5, 1.5f); // Place player nearby
+        });
+
+
+
         // Resume game
         manager.addAction(() -> {
             screen.setPaused(false);
             screen.player.isAlive = true;
+            this.used = true;
         });
     }
+
+    public void enterCutsceneDialogue () {
+        NPC_Sensei sensei = (NPC_Sensei) manager.screen.getTempNPC("oldMan");
+
+        manager.screen.isInDialogue = true;
+        manager.screen.currentNPC = sensei;
+
+        if (!sensei.dialogueHandler.hasBeenIntroduced) {
+            sensei.dialogueHandler.setDialogue("intro");
+        } else {
+            sensei.dialogueHandler.setDialogue("general");
+        }
+
+        sensei.dialogueHandler.startDialogue();
+    }
+
 }
+
